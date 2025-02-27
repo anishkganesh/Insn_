@@ -1,335 +1,160 @@
-import numpy as np
-import requests
-import io
-import pandas as pd
-import datamapplot
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Insn – Next-Gen Research Network</title>
+  <!-- Tailwind via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Import Raleway font -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" />
+  <style>
+    body {
+      font-family: 'Raleway', sans-serif;
+    }
+    /* Animated gradient background (and text/border) */
+    @keyframes gradientAnimation {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .gradient-text {
+      background: linear-gradient(90deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradientAnimation 5s ease infinite;
+    }
+    .gradient-border {
+      border-width: 2px;
+      border-style: solid;
+      border-image-slice: 1;
+      border-image-source: linear-gradient(45deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
+      animation: gradientAnimation 5s ease infinite;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <!-- Navigation -->
+  <nav class="w-full py-6 px-4 md:px-12 flex items-center justify-between">
+    <div class="text-2xl font-bold gradient-text">Insn</div>
+    <div class="space-x-6">
+      <a href="#features" class="hover:underline">Features</a>
+      <a href="#about" class="hover:underline">About</a>
+      <a href="#contact" class="hover:underline">Contact</a>
+    </div>
+  </nav>
 
-# --- Download the data ---
-base_url = "https://github.com/TutteInstitute/datamapplot"
+  <!-- Hero Section -->
+  <section class="flex flex-col items-center justify-center min-h-screen text-center px-4">
+    <h1 class="text-5xl md:text-7xl font-extrabold mb-6 gradient-text">
+      Revolutionize Your Research
+    </h1>
+    <p class="max-w-2xl text-lg mb-8">
+      Insn transforms academic research with dynamic, graph-based visualizations and AI-powered insights.
+      Discover hidden connections and stay ahead with real-time updates.
+    </p>
+    <!-- The button below links to your graph network (running on app.py) -->
+    <!-- index.html snippet -->
+  <a href="/app" target="_blank"
+     class="px-8 py-4 rounded-full text-white font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 transition transform hover:scale-105 shadow-lg">
+    Enter Insn
+  </a>
+  </section>
 
-# Download data map (2D coordinates)
-data_map_file = requests.get(f"{base_url}/raw/main/examples/arxiv_ml_data_map.npy")
-arxivml_data_map = np.load(io.BytesIO(data_map_file.content))
-
-# Download five layers of cluster labels
-arxivml_label_layers = []
-for layer_num in range(5):
-    label_file = requests.get(
-        f"{base_url}/raw/interactive/examples/arxiv_ml_layer{layer_num}_cluster_labels.npy"
-    )
-    arxivml_label_layers.append(np.load(io.BytesIO(label_file.content), allow_pickle=True))
-
-# Download hover data (e.g. paper titles)
-hover_data_file = requests.get(
-    f"{base_url}/raw/interactive/examples/arxiv_ml_hover_data.npy"
-)
-arxiv_hover_data = np.load(io.BytesIO(hover_data_file.content), allow_pickle=True)
-
-# --- Build extra point data for alternative search ---
-# For each point, join the labels (skipping "Unlabelled") from three layers
-topics_per_point = [
-    ", ".join([label for label in labels if label != "Unlabelled"])
-    for labels in zip(arxivml_label_layers[0], arxivml_label_layers[2], arxivml_label_layers[4])
-]
-topics_dataframe = pd.DataFrame({"topics": topics_per_point})
-
-# --- Custom HTML and CSS for the right-side panel with DeepSeek LLM chat integration ---
-custom_html = """
-<!-- Include Google Fonts for modern typography -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap">
-<!-- Include Font Awesome for icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<div id="details-panel">
-  <div id="draggable-header">DeepSeek Panel</div>
-  <div id="node-details-section">
-    <h2>Node Details</h2>
-    <div id="node-details">Click on a node to see details.</div>
-  </div>
-  <div id="chat-section">
-    <h2>Chat Interface</h2>
-    <div id="chat-container">
-      <div id="chat-conversation"></div>
-      <div id="chat-controls">
-        <textarea id="chat-input" placeholder="Ask about a topic or paper..."></textarea>
-        <button id="chat-submit">Search &amp; Chat</button>
-        <div id="action-buttons">
-          <button id="notifications-button" class="action-button"><i class="fa fa-bell"></i> Notifications</button>
-          <button id="saved-papers-button" class="action-button"><i class="fa fa-save"></i> Saved Papers</button>
-          <button id="authors-button" class="action-button"><i class="fa fa-user"></i> Authors</button>
+  <!-- Features Section -->
+  <section id="features" class="py-16 bg-white">
+    <div class="max-w-5xl mx-auto px-4">
+      <h2 class="text-4xl font-bold text-center mb-12 gradient-text">Why Insn?</h2>
+      <div class="grid md:grid-cols-2 gap-12">
+        <!-- Feature 1 -->
+        <div class="p-6 rounded-lg gradient-border hover:shadow-xl transition">
+          <div class="flex items-center mb-4">
+            <!-- Search Icon (from Heroicons) -->
+            <svg class="w-8 h-8 text-indigo-500 mr-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.49-5.65a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <h3 class="text-2xl font-bold">Interactive Graph Visualization</h3>
+          </div>
+          <p>
+            Navigate a dynamic map of millions of academic papers, unveiling hidden relationships and emerging trends.
+          </p>
+        </div>
+        <!-- Feature 2 -->
+        <div class="p-6 rounded-lg gradient-border hover:shadow-xl transition">
+          <div class="flex items-center mb-4">
+            <!-- AI Icon -->
+            <svg class="w-8 h-8 text-purple-500 mr-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+            </svg>
+            <h3 class="text-2xl font-bold">AI-Powered Insights</h3>
+          </div>
+          <p>
+            Get on-the-spot answers and deeper contextual understanding using our advanced language model tailored for academic research.
+          </p>
+        </div>
+        <!-- Feature 3 -->
+        <div class="p-6 rounded-lg gradient-border hover:shadow-xl transition">
+          <div class="flex items-center mb-4">
+            <!-- Refresh Icon -->
+            <svg class="w-8 h-8 text-pink-500 mr-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582M20 20v-5h-.581M4.582 9A9 9 0 1115 15.582" />
+            </svg>
+            <h3 class="text-2xl font-bold">Real-Time Updates</h3>
+          </div>
+          <p>
+            Stay current with daily ingestion of new research papers and personalized notifications designed for your interests.
+          </p>
+        </div>
+        <!-- Feature 4 -->
+        <div class="p-6 rounded-lg gradient-border hover:shadow-xl transition">
+          <div class="flex items-center mb-4">
+            <!-- Personalization Icon -->
+            <svg class="w-8 h-8 text-green-500 mr-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A8 8 0 1118.36 7.64m-3.536 6.364h.01" />
+            </svg>
+            <h3 class="text-2xl font-bold">Tailored Experience</h3>
+          </div>
+          <p>
+            Enjoy custom research feeds, advanced filtering, and intuitive navigation that adapts to your scholarly pursuits.
+          </p>
         </div>
       </div>
     </div>
-  </div>
-</div>
-<script>
-  // Replace with your actual OpenAI API key.
-  const openai_api_key = "YOUR_OPENAI_API_KEY";
+  </section>
 
-  // Function to process reply text and replace links with inline citation numbers.
-  function formatReply(reply) {
-    let citationCount = 0;
-    return reply.replace(/<a\\s+href="([^"]+)"[^>]*>(.*?)<\\/a>/g, function(match, url, text) {
-      citationCount++;
-      return `<sup><a href="${url}" target="_blank" style="text-decoration:none;">[${citationCount}]</a></sup>`;
-    });
-  }
+  <!-- About Section -->
+  <section id="about" class="py-16 bg-gray-100">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <h2 class="text-4xl font-bold mb-8 gradient-text">The Future of Research is Here</h2>
+      <p class="text-lg mb-6">
+        Traditional academic platforms force you to sift through endless lists and outdated information. Insn reinvents discovery by connecting you to the most relevant, up-to-date research using an immersive graph-based approach.
+      </p>
+      <p class="text-lg">
+        Experience seamless integration of AI, interactive visualizations, and personalized insights that empower you to explore, understand, and innovate.
+      </p>
+    </div>
+  </section>
 
-  document.getElementById("chat-submit").addEventListener("click", function() {
-    var query = document.getElementById("chat-input").value.trim();
-    if (!query) return;
+  <!-- Call-to-Action Section -->
+  <section class="py-16 bg-white">
+    <div class="max-w-4xl mx-auto text-center px-4">
+      <h2 class="text-4xl font-bold mb-8 gradient-text">Ready to Explore?</h2>
+      <a href="/app" target="_blank" class="inline-block px-10 py-4 rounded-full text-white font-semibold bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 hover:from-green-600 hover:via-blue-600 hover:to-purple-600 transition transform hover:scale-105 shadow-xl">
+        Launch Insn Graph
+      </a>
+    </div>
+  </section>
 
-    var chatConversation = document.getElementById("chat-conversation");
-    chatConversation.innerHTML += "<p><strong>You:</strong> " + query + "</p>";
-
-    fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-         "Content-Type": "application/json",
-         "Authorization": "Bearer " + openai_api_key
-      },
-      body: JSON.stringify({
-         model: "gpt-3.5-turbo",
-         messages: [
-           {
-             role: "system", 
-             content: "For every point you make, please include a citation from a research paper. Ensure that every citation is a clickable link to the research paper's page. Cite where you get every point from."
-           },
-           { role: "user", content: query }
-         ],
-         temperature: 0.7
-      })
-    })
-    .then(response => response.json())
-    .then(data => {
-       let reply = data.choices[0].message.content;
-       let formattedReply = formatReply(reply);
-       chatConversation.innerHTML += "<p><strong>DeepSeek LLM:</strong> " + formattedReply + "</p>";
-       document.getElementById("chat-input").value = "";
-       chatConversation.scrollTop = chatConversation.scrollHeight;
-    })
-    .catch(error => {
-       chatConversation.innerHTML += "<p style='color:red;'><strong>Error:</strong> " + error + "</p>";
-    });
-  });
-
-  function makeDraggable(el) {
-    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-    var header = document.getElementById("draggable-header");
-    if (header) {
-      header.onmousedown = dragMouseDown;
-    } else {
-      el.onmousedown = dragMouseDown;
-    }
-    function dragMouseDown(e) {
-      e = e || window.event;
-      e.preventDefault();
-      pos3 = e.clientX;
-      pos4 = e.clientY;
-      document.onmouseup = closeDragElement;
-      document.onmousemove = elementDrag;
-    }
-    function elementDrag(e) {
-      e = e || window.event;
-      e.preventDefault();
-      pos1 = pos3 - e.clientX;
-      pos2 = pos4 - e.clientY;
-      pos3 = e.clientX;
-      pos4 = e.clientY;
-      el.style.top = (el.offsetTop - pos2) + "px";
-      el.style.left = (el.offsetLeft - pos1) + "px";
-    }
-    function closeDragElement() {
-      document.onmouseup = null;
-      document.onmousemove = null;
-    }
-  }
-  makeDraggable(document.getElementById("details-panel"));
-</script>
-"""
-
-custom_css = """
-/* Global Styling */
-body {
-  font-family: 'Roboto', sans-serif;
-  background: #f5f5f5;
-  margin: 0;
-  padding: 0;
-  position: relative;
-}
-
-/* Keyframes for gradient animation */
-@keyframes gradientAnimation {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* Animated gradient border around the whole app */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  border: 5px solid transparent;
-  border-image: linear-gradient(45deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
-  border-image-slice: 1;
-  animation: gradientAnimation 5s ease infinite;
-  z-index: 9999;
-}
-
-/* Modern & Minimalistic Panel */
-#details-panel {
-  position: fixed;
-  top: 50px;
-  right: 20px;
-  width: 500px;
-  height: 80%;
-  background: #ffffff;
-  color: #333333;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  padding: 15px;
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  resize: both;
-  overflow: auto;
-  border-radius: 8px;
-}
-
-/* Draggable header styling */
-#draggable-header {
-  background: #f7f7f7;
-  padding: 12px;
-  cursor: move;
-  font-weight: 500;
-  text-align: center;
-  border-bottom: 1px solid #e0e0e0;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  user-select: none;
-}
-
-/* Node details section */
-#node-details-section {
-  flex: 1;
-  overflow-y: auto;
-  border-bottom: 1px solid #e0e0e0;
-  padding: 15px;
-  margin-bottom: 15px;
-}
-
-#node-details-section h2,
-#chat-section h2 {
-  font-size: 1.2rem;
-  margin-bottom: 10px;
-}
-
-/* Chat section */
-#chat-section {
-  flex: 2;
-  display: flex;
-  flex-direction: column;
-}
-
-#chat-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Chat conversation area */
-#chat-conversation {
-  flex: 1;
-  overflow-y: auto;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  padding: 10px;
-  background: #fafafa;
-}
-
-/* Chat controls */
-#chat-controls {
-  margin-top: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-#chat-controls textarea {
-  height: 80px;
-  padding: 10px;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  resize: none;
-  font-family: 'Roboto', sans-serif;
-  box-sizing: border-box;
-  width: 100%;
-}
-
-/* Gradient style for the chat submit button */
-#chat-controls button {
-  padding: 10px;
-  border: none;
-  color: #ffffff;
-  font-size: 1rem;
-  border-radius: 9999px;
-  cursor: pointer;
-  background: linear-gradient(to right, #6366f1, #a855f7, #ec4899);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-#chat-controls button:hover {
-  transform: scale(1.05);
-  background: linear-gradient(to right, #4f46e5, #8b5cf6, #d946ef);
-}
-
-/* Action buttons with similar gradient styling */
-#action-buttons {
-  display: flex;
-  justify-content: space-between;
-}
-.action-button {
-  flex: 1;
-  margin: 0 4px;
-  padding: 10px;
-  border: none;
-  border-radius: 9999px;
-  color: #ffffff;
-  font-size: 0.9rem;
-  cursor: pointer;
-  background: linear-gradient(to right, #6366f1, #a855f7, #ec4899);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-.action-button:hover {
-  transform: scale(1.05);
-  background: linear-gradient(to right, #4f46e5, #8b5cf6, #d946ef);
-}
-
-/* Chat links */
-#chat-conversation a {
-  color: #6366f1;
-  text-decoration: none;
-}
-#chat-conversation a:hover {
-  text-decoration: underline;
-}
-"""
-
-# --- Create the interactive plot ---
-plot = datamapplot.create_interactive_plot(
-    arxivml_data_map,
-    arxivml_label_layers[0],
-    arxivml_label_layers[2],
-    arxivml_label_layers[4],
-    font_family="Roboto",
-    hover_text=arxiv_hover_data,
-    extra_point_data=topics_dataframe,
-    enable_search=True,
-    search_field="topics",
-    on_click="document.getElementById('node-details').innerHTML = `{hover_text}`",
-    custom_html=custom_html,
-    custom_css=custom_css,
-)
-
-plot.save("static/ArXiv_data_map_example.html")
+  <!-- Footer -->
+  <footer id="contact" class="py-6 bg-gray-800 text-gray-300">
+    <div class="max-w-5xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
+      <p>&copy; 2025 Insn. All rights reserved.</p>
+      <div class="mt-4 md:mt-0 space-x-4">
+        <a href="#" class="hover:underline">Privacy Policy</a>
+        <a href="#" class="hover:underline">Terms of Service</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
