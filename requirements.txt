@@ -1,4 +1,8 @@
-Flask>=2.2.0
-datamapplot>=0.5.1
-numpy>=1.21.0
-requests>=2.25.0
+Flask
+numpy
+pandas
+requests
+beautifulsoup4
+colorcet
+datamapplot
+gunicorn
