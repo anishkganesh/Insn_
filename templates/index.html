@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Insn – Interactive Research Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3EI%3C/text%3E%3C/svg%3E">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Raleway Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Clerk JS SDK -->
+    <script async crossorigin="anonymous" data-clerk-publishable-key="pk_test_ZmluZS1yYXktMzEuY2xlcmsuYWNjb3VudHMuZGV2JA" src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
+    <style>
+      :root {
+        --bg-color: #FAFAFA;
+        --panel-bg: white;
+        --panel-bg-alt: #f9f9f9;
+        --graph-bg: #FAFAFA;
+        --text-color: #222;
+        --accent-color: #007BFF;
+        --success-color: #4CAF50;
+        --user-msg-bg: #e0f7fa;
+        --insn-msg-bg: #fff9c4;
+        --icon-border: 1px solid var(--accent-color);
+      }
+      html, body { margin: 0; height: 100%; }
+      body { font-family: 'Raleway', sans-serif; background: var(--bg-color); overflow: hidden; }
+      #topNav {
+        position: fixed; top: 0; left: 0; right: 0; height: 60px;
+        background: var(--panel-bg); display: flex; justify-content: space-between; align-items: center;
+        padding: 0 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 1100;
+      }
+      #topNav .brand {
+        font-size: 1.75rem; font-weight: 700;
+        background: linear-gradient(90deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
+        background-size: 200% 200%;
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        animation: gradientAnimation 5s ease infinite;
+      }
+      @keyframes gradientAnimation {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+      #topRightIcons { display: flex; gap: 10px; align-items: center; position: relative; }
+      .icon-button {
+        width: 30px; height: 30px; padding: 4px; background: var(--panel-bg);
+        border: var(--icon-border); border-radius: 50%; color: var(--accent-color);
+        display: inline-flex; align-items: center; justify-content: center;
+        cursor: pointer; transition: transform 0.3s ease; position: relative;
+      }
+      .icon-button:hover { transform: scale(1.1); }
+      .badge {
+        background: var(--success-color);
+        color: white;
+        border-radius: 50%;
+        padding: 2px 6px;
+        font-size: 0.75rem;
+        position: absolute;
+        top: -5px;
+        right: -5px;
+      }
+      #chatHistoryPanel {
+        position: fixed; top: 60px; left: 0; width: 250px; bottom: 0;
+        background: var(--panel-bg-alt); border-right: 1px solid #e5e7eb;
+        overflow-y: auto; padding: 10px; box-sizing: border-box; z-index: 900;
+      }
+      #chatHistoryPanel h2 {
+        font-size: 1.1rem; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
+      }
+      .chat-note {
+        font-size: 0.9rem; margin-bottom: 6px; padding: 8px;
+        border: 1px solid #e5e7eb; border-radius: 4px;
+        background: var(--panel-bg); cursor: pointer; transition: background 0.3s;
+      }
+      .chat-note:hover { background: #f0f0f0; }
+      #centerContainer {
+        position: absolute; top: 60px; left: 250px; right: 520px; bottom: 0;
+        background: var(--graph-bg); overflow: auto;
+      }
+      #centerContainer iframe { width: 100%; height: 100%; border: none; }
+      #rightPanel {
+        position: fixed; top: 60px; right: 0; width: 520px; bottom: 0;
+        background: var(--panel-bg); border-left: 1px solid #e5e7eb;
+        display: flex; flex-direction: column; z-index: 1000;
+      }
+      /* Paper Details Section */
+      #paperDetails { flex: 1; padding: 20px; overflow-y: auto; border-bottom: 1px solid #e5e7eb; }
+      #paperDetails h2 { font-size: 1.2rem; color: var(--accent-color); margin-top: 0; }
+      .action-buttons { margin: 10px 0; }
+      .action-buttons button {
+        font-size: 0.85rem; padding: 4px 8px; margin-right: 8px;
+        border: 1px solid var(--accent-color); background: transparent; border-radius: 4px;
+        color: var(--accent-color); cursor: pointer; transition: background 0.3s;
+      }
+      .action-buttons button:hover { background: var(--accent-color); color: #fff; }
+      /* Chat Panel */
+      #chatPanel { padding: 20px; display: flex; flex-direction: column; }
+      #chatPanel h2 { font-size: 1.2rem; color: var(--accent-color); margin-top: 0; }
+      #chatConversation {
+        height: 300px; overflow-y: auto; background: #f9f9f9; padding: 10px;
+        border: 1px solid #e5e7eb; border-radius: 4px; margin-bottom: 10px;
+        display: flex; flex-direction: column; gap: 6px;
+      }
+      .message { padding: 8px 10px; border-radius: 4px; max-width: 80%; word-wrap: break-word; }
+      .message.user { background: var(--user-msg-bg); align-self: flex-end; }
+      .message.insn { background: var(--insn-msg-bg); align-self: flex-start; }
+      #chatInput {
+        width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 4px;
+        outline: none; font-size: 1rem;
+      }
+      /* Popups */
+      #thinkingPopup {
+        position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+        padding: 8px 16px; border-radius: 4px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        font-size: 0.95rem; display: none; z-index: 1200;
+        color: white;
+      }
+      #favoritesPopup {
+        position: fixed; top: 50%; left: 50%;
+        transform: translate(-50%, -50%); background: var(--panel-bg); padding: 20px;
+        border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        z-index: 1300; display: none; max-height: 80%; overflow-y: auto;
+      }
+      #favoritesPopup h3 { margin-top: 0; }
+      #favoritesPopup ul { list-style: none; padding-left: 0; }
+      #favoritesPopup li { margin-bottom: 8px; }
+      #favoritesPopup .close-btn {
+        position: absolute; top: 8px; right: 12px; cursor: pointer; font-size: 1.2rem; color: var(--accent-color);
+      }
+    </style>
+    <script type="module">
+      // Global variables.
+      let savedPapers = [];
+      let followedAuthors = [];
+      let currentPaperTitle = "";
+      let recommendations = { papers: [], authors: [] };
+
+      // Load persistent data from localStorage based on Clerk user ID.
+      function loadPersistentData() {
+        if (Clerk.user?.id) {
+          const papers = localStorage.getItem('savedPapers_' + Clerk.user.id);
+          const authors = localStorage.getItem('followedAuthors_' + Clerk.user.id);
+          savedPapers = papers ? JSON.parse(papers) : [];
+          followedAuthors = authors ? JSON.parse(authors) : [];
+        }
+      }
+      
+      function updatePersistentData() {
+        if (Clerk.user?.id) {
+          localStorage.setItem('savedPapers_' + Clerk.user.id, JSON.stringify(savedPapers));
+          localStorage.setItem('followedAuthors_' + Clerk.user.id, JSON.stringify(followedAuthors));
+        }
+      }
+
+      // Expose functions to the global window object.
+      window.showThinkingPopup = function(show, message, color) {
+        const popup = document.getElementById("thinkingPopup");
+        if (show) {
+          popup.textContent = message || "Insn is thinking...";
+          // Use provided color or default; for completion events, use green.
+          popup.style.background = color || "var(--accent-color)";
+          popup.style.color = "white";
+          popup.style.display = "block";
+        } else {
+          popup.style.display = "none";
+        }
+      };
+
+      window.savePaper = function(title) {
+        console.log("savePaper called with title:", title);
+        window.showThinkingPopup(true, "Saving paper...");
+        setTimeout(() => {
+          if (!savedPapers.includes(title)) {
+            savedPapers.push(title);
+          }
+          console.log("Saved papers:", savedPapers);
+          window.showThinkingPopup(true, "Paper saved!", "var(--success-color)");
+          setTimeout(() => { window.showThinkingPopup(false); }, 1500);
+          updatePersistentData();
+          updateRecommendations();
+        }, 1000);
+      };
+
+      window.followAuthors = function(authors) {
+        console.log("followAuthors called with authors:", authors);
+        window.showThinkingPopup(true, "Following authors...");
+        setTimeout(() => {
+          let authorList = authors.split(",");
+          authorList.forEach(author => {
+            const trimmed = author.trim();
+            if (trimmed && !followedAuthors.includes(trimmed)) {
+              followedAuthors.push(trimmed);
+            }
+          });
+          console.log("Followed authors:", followedAuthors);
+          window.showThinkingPopup(true, "Authors followed!", "var(--success-color)");
+          setTimeout(() => { window.showThinkingPopup(false); }, 1500);
+          updatePersistentData();
+          updateRecommendations();
+        }, 1000);
+      };
+
+      window.createNewChat = function() {
+        const conv = document.getElementById("chatConversation");
+        conv.innerHTML = `<div class="message insn">Insn: How can I help you with "${currentPaperTitle || 'this paper'}"?</div>`;
+        const note = document.createElement("div");
+        note.textContent = currentPaperTitle || "New Chat";
+        note.className = "chat-note";
+        note.dataset.chat = conv.innerHTML;
+        note.addEventListener('click', function() {
+          document.getElementById("chatConversation").innerHTML = this.dataset.chat;
+          document.getElementById("chatConversation").scrollTop = document.getElementById("chatConversation").scrollHeight;
+        });
+        // Delete chat note immediately on right-click.
+        note.addEventListener('contextmenu', function(e) {
+          e.preventDefault();
+          this.remove();
+          saveChatHistory();
+        });
+        document.getElementById("chatHistoryList").insertBefore(note, document.getElementById("chatHistoryList").firstChild);
+        saveChatHistory();
+      };
+
+      function saveChatHistory() {
+        if (Clerk.user?.id) {
+          localStorage.setItem('chatHistory_' + Clerk.user.id, document.getElementById("chatHistoryList").innerHTML);
+        }
+      }
+
+      // Update recommendations using /get_recommendations endpoint.
+      function updateRecommendations() {
+        fetch("/get_recommendations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ savedPapers: savedPapers, followedAuthors: followedAuthors })
+        })
+        .then(response => response.json())
+        .then(data => {
+          // Filter out duplicate authors.
+          let uniqueAuthors = [];
+          data.authors.forEach(item => {
+            if (!uniqueAuthors.some(a => a.name === item.name)) {
+              uniqueAuthors.push(item);
+            }
+          });
+          recommendations = { papers: data.papers, authors: uniqueAuthors };
+          updateNotificationBadge();
+        })
+        .catch(error => {
+          console.error("Error updating recommendations:", error);
+        });
+      }
+
+      // Update the notification badge on the notification icon.
+      function updateNotificationBadge() {
+        const notifIcon = document.getElementById("notificationIcon");
+        let count = (recommendations.papers ? recommendations.papers.length : 0) +
+                    (recommendations.authors ? recommendations.authors.length : 0);
+        if(count > 0) {
+          notifIcon.innerHTML = `<i class="fa-regular fa-bell"></i><span class="badge">${count}</span>`;
+        } else {
+          notifIcon.innerHTML = `<i class="fa-regular fa-bell"></i>`;
+        }
+      }
+
+      // Show the notifications popup with recommendations.
+      function showNotificationsPopup() {
+        const notifPopup = document.getElementById("favoritesPopup");
+        let content = `<h3>Recommendations</h3>`;
+        if (recommendations.papers && recommendations.papers.length > 0) {
+          content += `<strong>New Papers:</strong><ul>`;
+          recommendations.papers.forEach(item => {
+            content += `<li><a href="#" onclick="fetchPaperDetails('${item.title}'); return false;">${item.title}</a></li>`;
+          });
+          content += `</ul>`;
+        } else {
+          content += `<p>No new paper recommendations.</p>`;
+        }
+        if (recommendations.authors && recommendations.authors.length > 0) {
+          content += `<strong>New Authors:</strong><ul>`;
+          recommendations.authors.forEach(item => {
+            content += `<li><a href="${item.url}" target="_blank">${item.name}</a></li>`;
+          });
+          content += `</ul>`;
+        } else {
+          content += `<p>No new author recommendations.</p>`;
+        }
+        notifPopup.innerHTML = content + `<span class="close-btn" id="closeNotifBtn">×</span>`;
+        notifPopup.style.display = "block";
+        document.getElementById("closeNotifBtn").addEventListener("click", () => {
+          notifPopup.style.display = "none";
+          // Reset recommendations after being read.
+          recommendations = { papers: [], authors: [] };
+          updateNotificationBadge();
+        });
+      }
+
+      // Override favoritesButton click to show the favorites popup.
+      function showFavoritesPopup() {
+        const favPopup = document.getElementById("favoritesPopup");
+        let content = `<h3>Favorites</h3>
+                       <strong>Saved Papers:</strong>`;
+        if (savedPapers.length) {
+          content += `<ul>`;
+          savedPapers.forEach(paper => {
+            const link = "https://scholar.google.com/scholar?q=" + encodeURIComponent(paper);
+            content += `<li><a href="${link}" target="_blank">${paper}</a></li>`;
+          });
+          content += `</ul>`;
+        } else {
+          content += `<p>No saved papers yet.</p>`;
+        }
+        content += `<strong>Followed Authors:</strong>`;
+        if (followedAuthors.length) {
+          content += `<ul>`;
+          followedAuthors.forEach(author => {
+            const link = "https://scholar.google.com/scholar?q=" + encodeURIComponent(author);
+            content += `<li><a href="${link}" target="_blank">${author}</a></li>`;
+          });
+          content += `</ul>`;
+        } else {
+          content += `<p>No authors followed yet.</p>`;
+        }
+        favPopup.innerHTML = content + `<span class="close-btn" id="closeFavBtn">×</span>`;
+        favPopup.style.display = "block";
+        document.getElementById("closeFavBtn").addEventListener("click", () => {
+          favPopup.style.display = "none";
+        });
+      }
+
+      window.fetchPaperDetails = function(title) {
+        currentPaperTitle = title;
+        document.getElementById("paperContent").innerHTML = `<p>Loading details for "${title}"...</p>`;
+        fetch('/get_arxiv_details?title=' + encodeURIComponent(title))
+          .then(response => response.json())
+          .then(data => {
+            if(data.error){
+              document.getElementById("paperContent").innerHTML = `<h2>${title}</h2><p>${data.error}</p>`;
+              return;
+            }
+            const paperLink = data.alternate_link !== ""
+              ? data.alternate_link
+              : "https://www.google.com/search?q=" + encodeURIComponent(data.title);
+            let content = `<h2><a href="${paperLink}" target="_blank" class="hover:underline">${data.title}</a></h2>
+                           <div class="action-buttons">
+                             <button onclick="savePaper('${data.title}')">Save Paper</button>
+                             <button onclick="followAuthors('${data.authors}')">Follow Authors</button>
+                           </div>`;
+            let authorsHTML = "";
+            if(data.authors !== ""){
+              const authorsArr = data.authors.split(",");
+              authorsArr.forEach(author => {
+                const trimmed = author.trim();
+                authorsHTML += `<a href="https://scholar.google.com/scholar?q=${encodeURIComponent(trimmed)}" target="_blank" class="hover:underline">${trimmed}</a>, `;
+              });
+              authorsHTML = authorsHTML.slice(0, -2);
+            } else {
+              authorsHTML = "No authors extracted.";
+            }
+            content += `<p><strong>ID:</strong> ${data.id}</p>
+                        <p><strong>Updated:</strong> ${data.updated}</p>
+                        <p><strong>Published:</strong> ${data.published}</p>
+                        <p><strong>Authors:</strong> ${authorsHTML}</p>
+                        <p><strong>Abstract:</strong> ${data.abstract}</p>
+                        <p><strong>Comment:</strong> ${data.comment}</p>
+                        <p><strong>Journal Ref:</strong> ${data.journal_ref}</p>
+                        <p><strong>DOI:</strong> ${data.doi}</p>
+                        <p><strong>Primary Category:</strong> ${data.primary_category}</p>
+                        <p><strong>Categories:</strong> ${data.categories}</p>
+                        <p><strong>Alternate Link:</strong> <a href="${data.alternate_link}" target="_blank">${data.alternate_link || "Google Search"}</a></p>
+                        <p><strong>PDF Link:</strong> <a href="${data.pdf_link}" target="_blank">${data.pdf_link}</a></p>`;
+            document.getElementById("paperContent").innerHTML = content;
+          })
+          .catch(error => {
+            console.error('Error fetching paper details:', error);
+            document.getElementById("paperContent").innerHTML = `<h2>${title}</h2><p>Error loading details.</p>`;
+          });
+      };
+
+      // Chat input event listener.
+      document.getElementById("chatInput").addEventListener("keydown", function(e) {
+        if(e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          const msg = this.value.trim();
+          if(!msg) return;
+          console.log("User input captured:", msg);
+          const conv = document.getElementById("chatConversation");
+          conv.innerHTML += `<div class="message user">You: ${msg}</div>`;
+          this.value = "";
+          conv.scrollTop = conv.scrollHeight;
+
+          const currentNote = document.querySelector("#chatHistoryList .chat-note");
+          if(currentNote) {
+            currentNote.dataset.chat = conv.innerHTML;
+            currentNote.textContent = currentPaperTitle || "New Chat";
+          }
+
+          if(currentPaperTitle) {
+            window.showThinkingPopup(true, "Insn is thinking...");
+            console.log("Fetching /ask_paper for question:", msg, "with title:", currentPaperTitle);
+            fetch("/ask_paper", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ question: msg, title: currentPaperTitle })
+            })
+            .then(response => {
+              console.log("Received response status:", response.status);
+              return response.json();
+            })
+            .then(data => {
+              console.log("Response data:", data);
+              conv.innerHTML += `<div class="message insn">Insn: ${data.response}</div>`;
+              conv.scrollTop = conv.scrollHeight;
+              window.showThinkingPopup(false);
+              if(currentNote) {
+                currentNote.dataset.chat = conv.innerHTML;
+                saveChatHistory();
+              }
+            })
+            .catch(error => {
+              console.error("Error in deep research chat:", error);
+              conv.innerHTML += `<div class="message insn">Insn: Error retrieving response.</div>`;
+              conv.scrollTop = conv.scrollHeight;
+              window.showThinkingPopup(false);
+            });
+          } else {
+            conv.innerHTML += `<div class="message insn">Insn: Please click a paper node first to load its details.</div>`;
+            conv.scrollTop = conv.scrollHeight;
+          }
+        }
+      });
+
+      window.addEventListener('load', async () => {
+        try { 
+          await Clerk.load(); 
+        } catch (err) { 
+          console.error("Error loading Clerk:", err); 
+          return; 
+        }
+        const navUserContainer = document.getElementById('nav-user');
+        if (Clerk.user && navUserContainer) {
+          navUserContainer.innerHTML = "";
+          Clerk.mountUserButton(navUserContainer);
+          loadPersistentData();
+          const savedHistory = localStorage.getItem('chatHistory_' + Clerk.user.id);
+          if (savedHistory) document.getElementById('chatHistoryList').innerHTML = savedHistory;
+        }
+        updateNotificationBadge();
+        document.getElementById('favoritesButton').innerHTML = `<i class="fa-regular fa-star"></i>`;
+        document.getElementById('favoritesButton').addEventListener("click", showFavoritesPopup);
+        document.getElementById('notificationIcon').addEventListener("click", showNotificationsPopup);
+        document.getElementById("newChatIcon").addEventListener("click", createNewChat);
+      });
+    </script>
+  </head>
+  <body>
+    <!-- Thinking Popup -->
+    <div id="thinkingPopup"></div>
+    <!-- Favorites/Notifications Popup -->
+    <div id="favoritesPopup"></div>
+    <!-- Top Navigation Bar -->
+    <div id="topNav" class="flex justify-between items-center">
+      <div class="brand">Insn</div>
+      <div id="topRightIcons">
+        <div id="notificationIcon" class="icon-button" title="Notifications"></div>
+        <div id="favoritesButton" class="icon-button" title="Favorites"></div>
+        <div id="nav-user" class="w-10 h-10"></div>
+      </div>
+    </div>
+    <!-- Left Sidebar: Chat History -->
+    <div id="chatHistoryPanel">
+      <h2 class="mb-4 flex justify-between items-center">
+        Chat History
+        <div id="newChatIcon" class="icon-button" title="New Chat">
+          <i class="fa-solid fa-plus"></i>
+        </div>
+      </h2>
+      <div id="chatHistoryList"></div>
+    </div>
+    <!-- Center Container: Interactive Plot -->
+    <div id="centerContainer">
+      <iframe src="/plot"></iframe>
+    </div>
+    <!-- Right Panel: Paper Details & Deep Research Chat -->
+    <div id="rightPanel">
+      <div id="paperDetails">
+        <h2 class="font-normal">Paper Details</h2>
+        <div id="paperContent" class="mt-2">
+          Click a node to view paper details.
+        </div>
+      </div>
+      <div id="chatPanel">
+        <h2 class="font-normal">Deep Research Chat</h2>
+        <div id="chatConversation" class="mt-2 flex flex-col">
+          <div class="message insn">Insn: How can I help you with this paper?</div>
+        </div>
+        <input type="text" id="chatInput" placeholder="Type your research question and press Enter..." class="mt-4" />
+      </div>
+    </div>
+  </body>
+</html>
