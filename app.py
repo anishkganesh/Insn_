@@ -13,10 +13,7 @@ import random  # For extra recommendations
 
 app = Flask(__name__)
 
-# Load OpenAI API key from environment variable.
 openai.api_key = os.getenv("OPENAI_API_KEY")
-
-# In-memory cache for paper details.
 paper_cache = {}
 
 def fetch_url(url):
@@ -36,7 +33,6 @@ def create_plot():
         arxivml_label_layers.append(np.load(io.BytesIO(label_file.content), allow_pickle=True))
     hover_data_file = fetch_url(f"{base_url}/raw/interactive/examples/arxiv_ml_hover_data.npy")
     arxiv_hover_data = np.load(io.BytesIO(hover_data_file.content), allow_pickle=True)
-    # Use a modern font for the graph
     plot = datamapplot.create_interactive_plot(
         arxivml_data_map,
         arxivml_label_layers[0],
@@ -84,7 +80,6 @@ def search_variant(query, title):
         return None, 0.0
 
 def query_arxiv_by_title_fast(title):
-    # Try a looser query based on a partial title first.
     words = title.split()
     if len(words) > 3:
         partial_title = " ".join(words[:min(5, len(words))])
@@ -94,14 +89,7 @@ def query_arxiv_by_title_fast(title):
     candidate, ratio = search_variant(looser_query, title)
     if candidate is not None:
         return candidate
-
-    # If looser query fails, fallback to stricter queries concurrently.
-    query_variants = [
-        f'ti:"{title}"',
-        f'all:"{title}"',
-        f'ti:{title}',
-        title
-    ]
+    query_variants = [f'ti:"{title}"', f'all:"{title}"', f'ti:{title}', title]
     best_candidate = None
     best_ratio = 0.0
     with concurrent.futures.ThreadPoolExecutor(max_workers=len(query_variants)) as executor:
@@ -177,7 +165,7 @@ def ask_paper():
         "For every sentence in your answer, include an inline citation formatted as a numbered hyperlink (for example, <a href='URL'>[1]</a>). "
         "Each citation must correspond to one of the following fields: Title, Authors, DOI, Abstract, or Published. "
         "If a citation is not already a hyperlink, manually hyperlink it to an appropriate source (for example, link 'Title' to a Google Scholar search for the title).\n\n"
-        "Paper Details:\n" + let_context + "\n\n"
+        "Paper Details:\n" + let_context + "\n\n" +
         "Question: " + question
     )
     try:
@@ -190,7 +178,6 @@ def ask_paper():
             max_tokens=200
         )
         final_response = completion.choices[0].message.content
-        # Extract citations that are hyperlinked in the format: <a href="URL">[number]</a>
         citations = re.findall(r'<a\s+href="([^"]+)">\[(\d+)\]</a>', final_response)
     except Exception as e:
         final_response = f"Error retrieving response from OpenAI: {str(e)}"
@@ -203,64 +190,49 @@ def ask_paper():
 
 @app.route('/get_recommendations', methods=['POST'])
 def get_recommendations():
-    """
-    Receives saved papers and followed authors (only the most recent two of each),
-    then queries the Semantic Scholar API for similar items.
-    Filters out items that the user has already read or followed.
-    Additionally, occasionally recommend items based on the user's reading habits.
-    """
     data = request.get_json()
     saved = data.get("savedPapers", [])
     authors_followed = data.get("followedAuthors", [])
     rec_papers = {}
     rec_authors = {}
-
-    # For each saved paper, query Semantic Scholar for recommendations
     for paper in saved:
         query = paper
         url = f"https://api.semanticscholar.org/graph/v1/paper/search?query={query}&limit=5&fields=title,url,year"
         try:
-            response = requests.get(url, timeout=5)
+            response = requests.get(url, timeout=10)
             if response.status_code == 200:
                 results = response.json().get("data", [])
                 for item in results:
                     title_rec = item.get("title")
                     url_rec = item.get("url")
                     year = item.get("year")
-                    # Filter out if this paper is already read.
                     if title_rec and url_rec and title_rec not in saved:
-                        # If we already have an entry, keep the one with the newer year.
                         if title_rec in rec_papers:
-                            if rec_papers[title_rec].get("year", 0) < (year or 0):
+                            if (rec_papers[title_rec].get("year") or 0) < (year or 0):
                                 rec_papers[title_rec] = {"url": url_rec, "year": year}
                         else:
                             rec_papers[title_rec] = {"url": url_rec, "year": year}
         except Exception as e:
             print("Error in recommendation for paper:", paper, e)
-
-    # For each followed author, query Semantic Scholar for similar authors.
     for author in authors_followed:
         query = author
         url = f"https://api.semanticscholar.org/graph/v1/author/search?query={query}&limit=5&fields=name,url"
         try:
-            response = requests.get(url, timeout=5)
+            response = requests.get(url, timeout=10)
             if response.status_code == 200:
                 results = response.json().get("data", [])
                 for item in results:
                     name_rec = item.get("name")
                     url_rec = item.get("url")
-                    # Filter out if already followed.
                     if name_rec and url_rec and name_rec not in authors_followed:
                         rec_authors[name_rec] = url_rec
         except Exception as e:
             print("Error in recommendation for author:", author, e)
-
-    # Occasionally add an extra recommendation based on the user's reading habits.
     if saved:
         random_saved = random.choice(saved)
         url_extra = f"https://api.semanticscholar.org/graph/v1/paper/search?query={random_saved}&limit=1&fields=title,url,year"
         try:
-            response = requests.get(url_extra, timeout=5)
+            response = requests.get(url_extra, timeout=10)
             if response.status_code == 200:
                 results = response.json().get("data", [])
                 if results:
@@ -272,9 +244,7 @@ def get_recommendations():
                         rec_papers[title_rec] = {"url": url_rec, "year": year}
         except Exception as e:
             print("Error in extra recommendation for reading habits:", e)
-
-    # Sort the recommended papers by year (newest first)
-    sorted_papers = sorted(rec_papers.items(), key=lambda x: x[1].get("year", 0), reverse=True)
+    sorted_papers = sorted(rec_papers.items(), key=lambda x: (x[1].get("year") or 0), reverse=True)
     recommendations = {
         "papers": [{"title": k, "url": v["url"]} for k, v in sorted_papers],
         "authors": [{"name": k, "url": v} for k, v in rec_authors.items()]
