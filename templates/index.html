@@ -4,10 +4,11 @@
     <meta charset="UTF-8" />
     <title>Insn – Interactive Research Map</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3EI%3C/text%3E%3C/svg%3E">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Raleway Font -->
+    <!-- Raleway Font (only) -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" />
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -16,8 +17,8 @@
     <style>
       :root {
         --bg-color: #FAFAFA;
-        --panel-bg: white;
-        --panel-bg-alt: #f9f9f9;
+        --panel-bg: #ffffff;
+        --panel-bg-alt: #f7f7f7;
         --graph-bg: #FAFAFA;
         --text-color: #222;
         --accent-color: #007BFF;
@@ -26,8 +27,34 @@
         --insn-msg-bg: #fff9c4;
         --icon-border: 1px solid var(--accent-color);
       }
-      html, body { margin: 0; height: 100%; }
-      body { font-family: 'Raleway', sans-serif; background: var(--bg-color); overflow: hidden; }
+      /* Global resets and fonts using Raleway only */
+      html, body { margin: 0; height: 100%; font-family: 'Raleway', sans-serif; }
+      body { background: var(--bg-color); overflow: hidden; }
+      
+      /* Loading overlay */
+      #loadingOverlay {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(255,255,255,0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+      }
+      .spinner {
+        border: 8px solid #f3f3f3;
+        border-top: 8px solid var(--accent-color);
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      /* Top Navigation */
       #topNav {
         position: fixed; top: 0; left: 0; right: 0; height: 60px;
         background: var(--panel-bg); display: flex; justify-content: space-between; align-items: center;
@@ -63,6 +90,8 @@
         top: -5px;
         right: -5px;
       }
+      
+      /* Sidebar & Container Layout */
       #chatHistoryPanel {
         position: fixed; top: 60px; left: 0; width: 250px; bottom: 0;
         background: var(--panel-bg-alt); border-right: 1px solid #e5e7eb;
@@ -87,6 +116,7 @@
         background: var(--panel-bg); border-left: 1px solid #e5e7eb;
         display: flex; flex-direction: column; z-index: 1000;
       }
+      
       /* Paper Details Section */
       #paperDetails { flex: 1; padding: 20px; overflow-y: auto; border-bottom: 1px solid #e5e7eb; }
       #paperDetails h2 { font-size: 1.2rem; color: var(--accent-color); margin-top: 0; }
@@ -97,6 +127,7 @@
         color: var(--accent-color); cursor: pointer; transition: background 0.3s;
       }
       .action-buttons button:hover { background: var(--accent-color); color: #fff; }
+      
       /* Chat Panel */
       #chatPanel { padding: 20px; display: flex; flex-direction: column; }
       #chatPanel h2 { font-size: 1.2rem; color: var(--accent-color); margin-top: 0; }
@@ -112,24 +143,34 @@
         width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 4px;
         outline: none; font-size: 1rem;
       }
-      /* Popups */
+      
+      /* Modern Popup (Favorites & Recommendations) */
+      #favoritesPopup {
+        position: fixed; top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        background: var(--panel-bg);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        z-index: 1300;
+        display: none;
+        max-height: 80%;
+        overflow-y: auto;
+      }
+      #favoritesPopup h3 { margin-top: 0; font-size: 1.25rem; }
+      #favoritesPopup ul { list-style: none; padding-left: 0; }
+      #favoritesPopup li { margin-bottom: 8px; }
+      #favoritesPopup .close-btn {
+        position: absolute; top: 8px; right: 12px;
+        cursor: pointer; font-size: 1.2rem; color: var(--accent-color);
+      }
+      
+      /* Thinking Popup */
       #thinkingPopup {
         position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
         padding: 8px 16px; border-radius: 4px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         font-size: 0.95rem; display: none; z-index: 1200;
         color: white;
-      }
-      #favoritesPopup {
-        position: fixed; top: 50%; left: 50%;
-        transform: translate(-50%, -50%); background: var(--panel-bg); padding: 20px;
-        border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        z-index: 1300; display: none; max-height: 80%; overflow-y: auto;
-      }
-      #favoritesPopup h3 { margin-top: 0; }
-      #favoritesPopup ul { list-style: none; padding-left: 0; }
-      #favoritesPopup li { margin-bottom: 8px; }
-      #favoritesPopup .close-btn {
-        position: absolute; top: 8px; right: 12px; cursor: pointer; font-size: 1.2rem; color: var(--accent-color);
       }
     </style>
     <script type="module">
@@ -161,9 +202,7 @@
         const popup = document.getElementById("thinkingPopup");
         if (show) {
           popup.textContent = message || "Insn is thinking...";
-          // Use provided color or default; for completion events, use green.
           popup.style.background = color || "var(--accent-color)";
-          popup.style.color = "white";
           popup.style.display = "block";
         } else {
           popup.style.display = "none";
@@ -171,13 +210,11 @@
       };
 
       window.savePaper = function(title) {
-        console.log("savePaper called with title:", title);
         window.showThinkingPopup(true, "Saving paper...");
         setTimeout(() => {
           if (!savedPapers.includes(title)) {
             savedPapers.push(title);
           }
-          console.log("Saved papers:", savedPapers);
           window.showThinkingPopup(true, "Paper saved!", "var(--success-color)");
           setTimeout(() => { window.showThinkingPopup(false); }, 1500);
           updatePersistentData();
@@ -186,17 +223,14 @@
       };
 
       window.followAuthors = function(authors) {
-        console.log("followAuthors called with authors:", authors);
         window.showThinkingPopup(true, "Following authors...");
         setTimeout(() => {
-          let authorList = authors.split(",");
-          authorList.forEach(author => {
+          authors.split(",").forEach(author => {
             const trimmed = author.trim();
             if (trimmed && !followedAuthors.includes(trimmed)) {
               followedAuthors.push(trimmed);
             }
           });
-          console.log("Followed authors:", followedAuthors);
           window.showThinkingPopup(true, "Authors followed!", "var(--success-color)");
           setTimeout(() => { window.showThinkingPopup(false); }, 1500);
           updatePersistentData();
@@ -215,7 +249,6 @@
           document.getElementById("chatConversation").innerHTML = this.dataset.chat;
           document.getElementById("chatConversation").scrollTop = document.getElementById("chatConversation").scrollHeight;
         });
-        // Delete chat note immediately on right-click.
         note.addEventListener('contextmenu', function(e) {
           e.preventDefault();
           this.remove();
@@ -293,7 +326,6 @@
         notifPopup.style.display = "block";
         document.getElementById("closeNotifBtn").addEventListener("click", () => {
           notifPopup.style.display = "none";
-          // Reset recommendations after being read.
           recommendations = { papers: [], authors: [] };
           updateNotificationBadge();
         });
@@ -387,32 +419,24 @@
           e.preventDefault();
           const msg = this.value.trim();
           if(!msg) return;
-          console.log("User input captured:", msg);
           const conv = document.getElementById("chatConversation");
           conv.innerHTML += `<div class="message user">You: ${msg}</div>`;
           this.value = "";
           conv.scrollTop = conv.scrollHeight;
-
           const currentNote = document.querySelector("#chatHistoryList .chat-note");
           if(currentNote) {
             currentNote.dataset.chat = conv.innerHTML;
             currentNote.textContent = currentPaperTitle || "New Chat";
           }
-
           if(currentPaperTitle) {
             window.showThinkingPopup(true, "Insn is thinking...");
-            console.log("Fetching /ask_paper for question:", msg, "with title:", currentPaperTitle);
             fetch("/ask_paper", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ question: msg, title: currentPaperTitle })
             })
-            .then(response => {
-              console.log("Received response status:", response.status);
-              return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-              console.log("Response data:", data);
               conv.innerHTML += `<div class="message insn">Insn: ${data.response}</div>`;
               conv.scrollTop = conv.scrollHeight;
               window.showThinkingPopup(false);
@@ -422,7 +446,6 @@
               }
             })
             .catch(error => {
-              console.error("Error in deep research chat:", error);
               conv.innerHTML += `<div class="message insn">Insn: Error retrieving response.</div>`;
               conv.scrollTop = conv.scrollHeight;
               window.showThinkingPopup(false);
@@ -434,6 +457,7 @@
         }
       });
 
+      // Hide the loading overlay when everything is loaded.
       window.addEventListener('load', async () => {
         try { 
           await Clerk.load(); 
@@ -454,13 +478,19 @@
         document.getElementById('favoritesButton').addEventListener("click", showFavoritesPopup);
         document.getElementById('notificationIcon').addEventListener("click", showNotificationsPopup);
         document.getElementById("newChatIcon").addEventListener("click", createNewChat);
+        // Hide loading overlay once all elements are ready.
+        document.getElementById("loadingOverlay").style.display = "none";
       });
     </script>
   </head>
   <body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+      <div class="spinner"></div>
+    </div>
     <!-- Thinking Popup -->
     <div id="thinkingPopup"></div>
-    <!-- Favorites/Notifications Popup -->
+    <!-- Favorites/Recommendations Popup -->
     <div id="favoritesPopup"></div>
     <!-- Top Navigation Bar -->
     <div id="topNav" class="flex justify-between items-center">
