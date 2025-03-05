@@ -61,7 +61,8 @@
         padding: 0 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 1100;
       }
       #topNav .brand {
-        font-size: 1.75rem; font-weight: 700;
+        font-size: 1.5rem; /* Reduced from 1.75rem */
+        font-weight: 700;
         background: linear-gradient(90deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
         background-size: 200% 200%;
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
@@ -179,6 +180,7 @@
       let followedAuthors = [];
       let currentPaperTitle = "";
       let recommendations = { papers: [], authors: [] };
+      let activeChatNote = null;  // Track the currently active chat note.
 
       // Load persistent data from localStorage based on Clerk user ID.
       function loadPersistentData() {
@@ -242,12 +244,14 @@
         const conv = document.getElementById("chatConversation");
         conv.innerHTML = `<div class="message insn">Insn: How can I help you with "${currentPaperTitle || 'this paper'}"?</div>`;
         const note = document.createElement("div");
-        note.textContent = currentPaperTitle || "New Chat";
+        note.textContent = "New Chat";
         note.className = "chat-note";
         note.dataset.chat = conv.innerHTML;
+        // When a chat note is clicked, load its conversation but do not change its order.
         note.addEventListener('click', function() {
           document.getElementById("chatConversation").innerHTML = this.dataset.chat;
           document.getElementById("chatConversation").scrollTop = document.getElementById("chatConversation").scrollHeight;
+          activeChatNote = this;
         });
         note.addEventListener('contextmenu', function(e) {
           e.preventDefault();
@@ -255,6 +259,7 @@
           saveChatHistory();
         });
         document.getElementById("chatHistoryList").insertBefore(note, document.getElementById("chatHistoryList").firstChild);
+        activeChatNote = note;  // Set new chat as the active one.
         saveChatHistory();
       };
 
@@ -423,10 +428,16 @@
           conv.innerHTML += `<div class="message user">You: ${msg}</div>`;
           this.value = "";
           conv.scrollTop = conv.scrollHeight;
-          const currentNote = document.querySelector("#chatHistoryList .chat-note");
-          if(currentNote) {
-            currentNote.dataset.chat = conv.innerHTML;
-            currentNote.textContent = currentPaperTitle || "New Chat";
+          // When the user types, update the active chat note and move it to the top.
+          if(activeChatNote) {
+            activeChatNote.dataset.chat = conv.innerHTML;
+            // If the note still says "New Chat" and a paper title is available, update it.
+            if(activeChatNote.textContent === "New Chat" && currentPaperTitle) {
+              activeChatNote.textContent = currentPaperTitle;
+            }
+            const chatHistoryList = document.getElementById("chatHistoryList");
+            chatHistoryList.insertBefore(activeChatNote, chatHistoryList.firstChild);
+            saveChatHistory();
           }
           if(currentPaperTitle) {
             window.showThinkingPopup(true, "Insn is thinking...");
@@ -439,10 +450,14 @@
             .then(data => {
               conv.innerHTML += `<div class="message insn">Insn: ${data.response}</div>`;
               conv.scrollTop = conv.scrollHeight;
-              window.showThinkingPopup(false);
-              if(currentNote) {
-                currentNote.dataset.chat = conv.innerHTML;
+              window.showThinkingPopup(true, "Insn results displayed", "var(--success-color)");
+              setTimeout(() => { window.showThinkingPopup(false); }, 1500);
+              if(activeChatNote) {
+                activeChatNote.dataset.chat = conv.innerHTML;
                 saveChatHistory();
+                // Move activeChatNote to top after new input.
+                const chatHistoryList = document.getElementById("chatHistoryList");
+                chatHistoryList.insertBefore(activeChatNote, chatHistoryList.firstChild);
               }
             })
             .catch(error => {
