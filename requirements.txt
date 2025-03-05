@@ -3,7 +3,7 @@ beautifulsoup4
 colorcet
 gunicorn
 Flask==2.0.1
-numpy==1.21.0
+numpy==1.25.0
 requests==2.25.1
 datamapplot==0.5.1
 arxiv
