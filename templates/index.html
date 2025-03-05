@@ -8,15 +8,10 @@
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3EI%3C/text%3E%3C/svg%3E">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Raleway Font -->
+    <!-- Raleway Font (only) -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" />
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <!-- PDF.js from CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.7.107/pdf.min.js"></script>
-    <script>
-      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.7.107/pdf.worker.min.js";
-    </script>
     <!-- Clerk JS SDK -->
     <script async crossorigin="anonymous" data-clerk-publishable-key="pk_test_ZmluZS1yYXktMzEuY2xlcmsuYWNjb3VudHMuZGV2JA" src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
     <style>
@@ -32,21 +27,32 @@
         --insn-msg-bg: #fff9c4;
         --icon-border: 1px solid var(--accent-color);
       }
+      /* Global resets and fonts using Raleway only */
       html, body { margin: 0; height: 100%; font-family: 'Raleway', sans-serif; }
       body { background: var(--bg-color); overflow: hidden; }
       
-      /* Loading Overlay */
+      /* Loading overlay */
       #loadingOverlay {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(255,255,255,0.8); display: flex;
-        align-items: center; justify-content: center; z-index: 2000;
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(255,255,255,0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
       }
       .spinner {
-        border: 8px solid #f3f3f3; border-top: 8px solid var(--accent-color);
-        border-radius: 50%; width: 60px; height: 60px;
+        border: 8px solid #f3f3f3;
+        border-top: 8px solid var(--accent-color);
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
         animation: spin 1s linear infinite;
       }
-      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
       
       /* Top Navigation */
       #topNav {
@@ -55,10 +61,12 @@
         padding: 0 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 1100;
       }
       #topNav .brand {
-        font-size: 1.5rem; font-weight: 700;
+        font-size: 1.5rem; /* Reduced from 1.75rem */
+        font-weight: 700;
         background: linear-gradient(90deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
-        background-size: 200% 200%; -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent; animation: gradientAnimation 5s ease infinite;
+        background-size: 200% 200%;
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        animation: gradientAnimation 5s ease infinite;
       }
       @keyframes gradientAnimation {
         0% { background-position: 0% 50%; }
@@ -74,9 +82,14 @@
       }
       .icon-button:hover { transform: scale(1.1); }
       .badge {
-        background: var(--success-color); color: white; border-radius: 50%;
-        padding: 2px 6px; font-size: 0.75rem; position: absolute;
-        top: -5px; right: -5px;
+        background: var(--success-color);
+        color: white;
+        border-radius: 50%;
+        padding: 2px 6px;
+        font-size: 0.75rem;
+        position: absolute;
+        top: -5px;
+        right: -5px;
       }
       
       /* Sidebar & Container Layout */
@@ -86,8 +99,7 @@
         overflow-y: auto; padding: 10px; box-sizing: border-box; z-index: 900;
       }
       #chatHistoryPanel h2 {
-        font-size: 1.1rem; margin-bottom: 10px; display: flex;
-        justify-content: space-between; align-items: center;
+        font-size: 1.1rem; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
       }
       .chat-note {
         font-size: 0.9rem; margin-bottom: 6px; padding: 8px;
@@ -112,9 +124,8 @@
       .action-buttons { margin: 10px 0; }
       .action-buttons button {
         font-size: 0.85rem; padding: 4px 8px; margin-right: 8px;
-        border: 1px solid var(--accent-color); background: transparent;
-        border-radius: 4px; color: var(--accent-color); cursor: pointer;
-        transition: background 0.3s;
+        border: 1px solid var(--accent-color); background: transparent; border-radius: 4px;
+        color: var(--accent-color); cursor: pointer; transition: background 0.3s;
       }
       .action-buttons button:hover { background: var(--accent-color); color: #fff; }
       
@@ -126,18 +137,27 @@
         border: 1px solid #e5e7eb; border-radius: 4px; margin-bottom: 10px;
         display: flex; flex-direction: column; gap: 6px;
       }
-      .message { padding: 8px 10px; border-radius: 4px; max-width: 80%;
-        word-wrap: break-word; }
+      .message { padding: 8px 10px; border-radius: 4px; max-width: 80%; word-wrap: break-word; }
       .message.user { background: var(--user-msg-bg); align-self: flex-end; }
       .message.insn { background: var(--insn-msg-bg); align-self: flex-start; }
-      #chatInput { width: 100%; padding: 10px; border: 1px solid #e5e7eb;
-        border-radius: 4px; outline: none; font-size: 1rem; }
+      #chatInput {
+        width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 4px;
+        outline: none; font-size: 1rem;
+      }
       
       /* Modern Popup (Favorites & Recommendations) */
-      #favoritesPopup { position: fixed; top: 50%; left: 50%;
-        transform: translate(-50%, -50%); background: var(--panel-bg);
-        padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        z-index: 1300; display: none; max-height: 80%; overflow-y: auto; }
+      #favoritesPopup {
+        position: fixed; top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        background: var(--panel-bg);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        z-index: 1300;
+        display: none;
+        max-height: 80%;
+        overflow-y: auto;
+      }
       #favoritesPopup h3 { margin-top: 0; font-size: 1.25rem; }
       #favoritesPopup ul { list-style: none; padding-left: 0; }
       #favoritesPopup li { margin-bottom: 8px; }
@@ -147,33 +167,22 @@
       }
       
       /* Thinking Popup */
-      #thinkingPopup { position: fixed; top: 70px; left: 50%;
-        transform: translateX(-50%); padding: 8px 16px; border-radius: 4px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1); font-size: 0.95rem;
-        display: none; z-index: 1200; color: white; }
-      
-      /* PDF Overlay styles */
-      #pdfOverlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-        z-index: 1100; background: white; overflow: auto; }
-      #pdfControls { position: absolute; top: 10px; right: 10px; z-index: 1200; }
-      #pdfControls button {
-        margin-left: 5px; padding: 6px 10px; font-size: 0.85rem;
-        background: var(--accent-color); color: white; border: none;
-        border-radius: 4px; cursor: pointer;
+      #thinkingPopup {
+        position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+        padding: 8px 16px; border-radius: 4px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        font-size: 0.95rem; display: none; z-index: 1200;
+        color: white;
       }
     </style>
     <script type="module">
-      // Global variables for PDF document, zoom, text, and highlights.
+      // Global variables.
       let savedPapers = [];
       let followedAuthors = [];
       let currentPaperTitle = "";
       let recommendations = { papers: [], authors: [] };
-      let activeChatNote = null;
-      let pdfZoom = 1;
-      let currentPdfDoc = null;
-      let pdfTextContents = {};    // { pageNum: textContent }
-      let highlightRegions = {};   // { pageNum: [ {x, y, width, height} ] }
-      
+      let activeChatNote = null;  // Track the currently active chat note.
+
+      // Load persistent data from localStorage based on Clerk user ID.
       function loadPersistentData() {
         if (Clerk.user?.id) {
           const papers = localStorage.getItem('savedPapers_' + Clerk.user.id);
@@ -182,35 +191,47 @@
           followedAuthors = authors ? JSON.parse(authors) : [];
         }
       }
+      
       function updatePersistentData() {
         if (Clerk.user?.id) {
           localStorage.setItem('savedPapers_' + Clerk.user.id, JSON.stringify(savedPapers));
           localStorage.setItem('followedAuthors_' + Clerk.user.id, JSON.stringify(followedAuthors));
         }
       }
+
+      // Expose functions to the global window object.
       window.showThinkingPopup = function(show, message, color) {
         const popup = document.getElementById("thinkingPopup");
-        if (show) { popup.textContent = message || "Insn is thinking...";
+        if (show) {
+          popup.textContent = message || "Insn is thinking...";
           popup.style.background = color || "var(--accent-color)";
           popup.style.display = "block";
-        } else { popup.style.display = "none"; }
+        } else {
+          popup.style.display = "none";
+        }
       };
+
       window.savePaper = function(title) {
         window.showThinkingPopup(true, "Saving paper...");
         setTimeout(() => {
-          if (!savedPapers.includes(title)) { savedPapers.push(title); }
+          if (!savedPapers.includes(title)) {
+            savedPapers.push(title);
+          }
           window.showThinkingPopup(true, "Paper saved!", "var(--success-color)");
           setTimeout(() => { window.showThinkingPopup(false); }, 1500);
           updatePersistentData();
           updateRecommendations();
         }, 1000);
       };
+
       window.followAuthors = function(authors) {
         window.showThinkingPopup(true, "Following authors...");
         setTimeout(() => {
           authors.split(",").forEach(author => {
             const trimmed = author.trim();
-            if (trimmed && !followedAuthors.includes(trimmed)) { followedAuthors.push(trimmed); }
+            if (trimmed && !followedAuthors.includes(trimmed)) {
+              followedAuthors.push(trimmed);
+            }
           });
           window.showThinkingPopup(true, "Authors followed!", "var(--success-color)");
           setTimeout(() => { window.showThinkingPopup(false); }, 1500);
@@ -218,6 +239,7 @@
           updateRecommendations();
         }, 1000);
       };
+
       window.createNewChat = function() {
         const conv = document.getElementById("chatConversation");
         conv.innerHTML = `<div class="message insn">Insn: How can I help you with "${currentPaperTitle || 'this paper'}"?</div>`;
@@ -225,22 +247,29 @@
         note.textContent = "New Chat";
         note.className = "chat-note";
         note.dataset.chat = conv.innerHTML;
+        // When a chat note is clicked, load its conversation but do not change its order.
         note.addEventListener('click', function() {
           document.getElementById("chatConversation").innerHTML = this.dataset.chat;
           document.getElementById("chatConversation").scrollTop = document.getElementById("chatConversation").scrollHeight;
           activeChatNote = this;
         });
         note.addEventListener('contextmenu', function(e) {
-          e.preventDefault(); this.remove(); saveChatHistory();
+          e.preventDefault();
+          this.remove();
+          saveChatHistory();
         });
         document.getElementById("chatHistoryList").insertBefore(note, document.getElementById("chatHistoryList").firstChild);
-        activeChatNote = note; saveChatHistory();
+        activeChatNote = note;  // Set new chat as the active one.
+        saveChatHistory();
       };
+
       function saveChatHistory() {
         if (Clerk.user?.id) {
           localStorage.setItem('chatHistory_' + Clerk.user.id, document.getElementById("chatHistoryList").innerHTML);
         }
       }
+
+      // Update recommendations using /get_recommendations endpoint.
       function updateRecommendations() {
         fetch("/get_recommendations", {
           method: "POST",
@@ -249,42 +278,69 @@
         })
         .then(response => response.json())
         .then(data => {
+          // Filter out duplicate authors.
           let uniqueAuthors = [];
-          data.authors.forEach(item => { if (!uniqueAuthors.some(a => a.name === item.name)) { uniqueAuthors.push(item); } });
+          data.authors.forEach(item => {
+            if (!uniqueAuthors.some(a => a.name === item.name)) {
+              uniqueAuthors.push(item);
+            }
+          });
           recommendations = { papers: data.papers, authors: uniqueAuthors };
           updateNotificationBadge();
         })
-        .catch(error => { console.error("Error updating recommendations:", error); });
+        .catch(error => {
+          console.error("Error updating recommendations:", error);
+        });
       }
+
+      // Update the notification badge on the notification icon.
       function updateNotificationBadge() {
         const notifIcon = document.getElementById("notificationIcon");
         let count = (recommendations.papers ? recommendations.papers.length : 0) +
                     (recommendations.authors ? recommendations.authors.length : 0);
-        notifIcon.innerHTML = count > 0 ? `<i class="fa-regular fa-bell"></i><span class="badge">${count}</span>` : `<i class="fa-regular fa-bell"></i>`;
+        if(count > 0) {
+          notifIcon.innerHTML = `<i class="fa-regular fa-bell"></i><span class="badge">${count}</span>`;
+        } else {
+          notifIcon.innerHTML = `<i class="fa-regular fa-bell"></i>`;
+        }
       }
+
+      // Show the notifications popup with recommendations.
       function showNotificationsPopup() {
         const notifPopup = document.getElementById("favoritesPopup");
         let content = `<h3>Recommendations</h3>`;
         if (recommendations.papers && recommendations.papers.length > 0) {
           content += `<strong>New Papers:</strong><ul>`;
-          recommendations.papers.forEach(item => { content += `<li><a href="#" onclick="fetchPaperDetails('${item.title}'); return false;">${item.title}</a></li>`; });
+          recommendations.papers.forEach(item => {
+            content += `<li><a href="#" onclick="fetchPaperDetails('${item.title}'); return false;">${item.title}</a></li>`;
+          });
           content += `</ul>`;
-        } else { content += `<p>No new paper recommendations.</p>`; }
+        } else {
+          content += `<p>No new paper recommendations.</p>`;
+        }
         if (recommendations.authors && recommendations.authors.length > 0) {
           content += `<strong>New Authors:</strong><ul>`;
-          recommendations.authors.forEach(item => { content += `<li><a href="${item.url}" target="_blank">${item.name}</a></li>`; });
+          recommendations.authors.forEach(item => {
+            content += `<li><a href="${item.url}" target="_blank">${item.name}</a></li>`;
+          });
           content += `</ul>`;
-        } else { content += `<p>No new author recommendations.</p>`; }
+        } else {
+          content += `<p>No new author recommendations.</p>`;
+        }
         notifPopup.innerHTML = content + `<span class="close-btn" id="closeNotifBtn">×</span>`;
         notifPopup.style.display = "block";
         document.getElementById("closeNotifBtn").addEventListener("click", () => {
-          notifPopup.style.display = "none"; recommendations = { papers: [], authors: [] };
+          notifPopup.style.display = "none";
+          recommendations = { papers: [], authors: [] };
           updateNotificationBadge();
         });
       }
+
+      // Override favoritesButton click to show the favorites popup.
       function showFavoritesPopup() {
         const favPopup = document.getElementById("favoritesPopup");
-        let content = `<h3>Favorites</h3><strong>Saved Papers:</strong>`;
+        let content = `<h3>Favorites</h3>
+                       <strong>Saved Papers:</strong>`;
         if (savedPapers.length) {
           content += `<ul>`;
           savedPapers.forEach(paper => {
@@ -292,7 +348,9 @@
             content += `<li><a href="${link}" target="_blank">${paper}</a></li>`;
           });
           content += `</ul>`;
-        } else { content += `<p>No saved papers yet.</p>`; }
+        } else {
+          content += `<p>No saved papers yet.</p>`;
+        }
         content += `<strong>Followed Authors:</strong>`;
         if (followedAuthors.length) {
           content += `<ul>`;
@@ -301,236 +359,16 @@
             content += `<li><a href="${link}" target="_blank">${author}</a></li>`;
           });
           content += `</ul>`;
-        } else { content += `<p>No authors followed yet.</p>`; }
+        } else {
+          content += `<p>No authors followed yet.</p>`;
+        }
         favPopup.innerHTML = content + `<span class="close-btn" id="closeFavBtn">×</span>`;
         favPopup.style.display = "block";
-        document.getElementById("closeFavBtn").addEventListener("click", () => { favPopup.style.display = "none"; });
-      }
-      
-      // NEW: Function to load the PDF overlay using custom PDF.js rendering,
-      // supporting zoom via controls or mouse wheel and actual text extraction from highlights.
-      window.loadPDFInGraph = function(url) {
-        console.log("Loading PDF in overlay:", url);
-        const centerContainer = document.getElementById("centerContainer");
-        let overlay = document.getElementById("pdfOverlay");
-        if (overlay) { overlay.remove(); }
-        overlay = document.createElement("div");
-        overlay.id = "pdfOverlay";
-        overlay.style.position = "absolute";
-        overlay.style.top = "0";
-        overlay.style.left = "0";
-        overlay.style.right = "0";
-        overlay.style.bottom = "0";
-        overlay.style.zIndex = "1100";
-        overlay.style.background = "white";
-        overlay.style.overflowY = "auto";
-        
-        // PDF Controls panel.
-        const controls = document.createElement("div");
-        controls.id = "pdfControls";
-        controls.style.display = "flex";
-        controls.style.justifyContent = "flex-end";
-        controls.style.position = "absolute";
-        controls.style.top = "10px";
-        controls.style.right = "10px";
-        // Zoom Out button.
-        const zoomOutBtn = document.createElement("button");
-        zoomOutBtn.textContent = "−";
-        zoomOutBtn.title = "Zoom Out";
-        zoomOutBtn.className = "action-buttons";
-        zoomOutBtn.addEventListener("click", function() {
-          pdfZoom = Math.max(0.5, pdfZoom - 0.1);
-          renderPdfPages();
-        });
-        // Zoom In button.
-        const zoomInBtn = document.createElement("button");
-        zoomInBtn.textContent = "+";
-        zoomInBtn.title = "Zoom In";
-        zoomInBtn.className = "action-buttons";
-        zoomInBtn.addEventListener("click", function() {
-          pdfZoom += 0.1;
-          renderPdfPages();
-        });
-        // Use Highlight as Context button.
-        const highlightBtn = document.createElement("button");
-        highlightBtn.textContent = "Use Highlight as Context";
-        highlightBtn.className = "action-buttons";
-        highlightBtn.addEventListener("click", function() {
-          const contextText = extractHighlightedText();
-          if(contextText.trim().length > 0) {
-            const chatInput = document.getElementById("chatInput");
-            chatInput.value = contextText + "\n" + chatInput.value;
-            chatInput.focus();
-          } else {
-            alert("No highlighted text found. Please highlight some text.");
-          }
-        });
-        controls.appendChild(zoomOutBtn);
-        controls.appendChild(zoomInBtn);
-        controls.appendChild(highlightBtn);
-        overlay.appendChild(controls);
-        
-        // Back to Graph button.
-        const backButton = document.createElement("button");
-        backButton.textContent = "Back to Graph";
-        backButton.style.position = "absolute";
-        backButton.style.zIndex = "1200";
-        backButton.style.top = "10px";
-        backButton.style.left = "10px";
-        backButton.style.padding = "8px 12px";
-        backButton.style.background = "var(--accent-color)";
-        backButton.style.color = "white";
-        backButton.style.border = "none";
-        backButton.style.borderRadius = "4px";
-        backButton.style.cursor = "pointer";
-        backButton.addEventListener("click", function() { overlay.remove(); });
-        overlay.appendChild(backButton);
-        
-        // Container for PDF pages.
-        const pdfContainer = document.createElement("div");
-        pdfContainer.id = "pdfContainer";
-        pdfContainer.style.marginTop = "60px";
-        overlay.appendChild(pdfContainer);
-        centerContainer.appendChild(overlay);
-        
-        // Reset globals.
-        pdfZoom = 1;
-        currentPdfDoc = null;
-        pdfTextContents = {};
-        highlightRegions = {};
-        
-        // Load PDF document.
-        pdfjsLib.getDocument(url).promise.then(pdfDoc => {
-          console.log("PDF loaded with", pdfDoc.numPages, "pages.");
-          currentPdfDoc = pdfDoc;
-          renderPdfPages();
-        }).catch(error => {
-          console.error("Error loading PDF:", error);
-          overlay.innerHTML = "<p>Error loading PDF.</p>";
-        });
-        
-        // Allow zoom with mouse wheel when ctrl is pressed.
-        overlay.addEventListener("wheel", function(e) {
-          if (e.ctrlKey) {
-            e.preventDefault();
-            if (e.deltaY < 0) { pdfZoom += 0.1; }
-            else { pdfZoom = Math.max(0.5, pdfZoom - 0.1); }
-            renderPdfPages();
-          }
+        document.getElementById("closeFavBtn").addEventListener("click", () => {
+          favPopup.style.display = "none";
         });
       }
-      
-      // Function to render PDF pages.
-      function renderPdfPages() {
-        const container = document.getElementById("pdfContainer");
-        container.innerHTML = "";
-        if (!currentPdfDoc) return;
-        for (let pageNum = 1; pageNum <= currentPdfDoc.numPages; pageNum++) {
-          currentPdfDoc.getPage(pageNum).then(page => {
-            const viewport = page.getViewport({ scale: pdfZoom });
-            const pageDiv = document.createElement("div");
-            pageDiv.style.position = "relative";
-            pageDiv.style.margin = "10px auto";
-            pageDiv.style.width = viewport.width + "px";
-            pageDiv.style.height = viewport.height + "px";
-            
-            const canvas = document.createElement("canvas");
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-            canvas.style.display = "block";
-            pageDiv.appendChild(canvas);
-            const context = canvas.getContext("2d");
-            page.render({ canvasContext: context, viewport: viewport });
-            
-            // Get and store text content.
-            page.getTextContent().then(textContent => {
-              pdfTextContents[pageNum] = textContent;
-            });
-            
-            // Overlay canvas for highlights.
-            const hlCanvas = document.createElement("canvas");
-            hlCanvas.width = viewport.width;
-            hlCanvas.height = viewport.height;
-            hlCanvas.style.position = "absolute";
-            hlCanvas.style.top = "0";
-            hlCanvas.style.left = "0";
-            hlCanvas.style.cursor = "crosshair";
-            hlCanvas.classList.add("pageHighlight");
-            hlCanvas.dataset.page = pageNum;
-            pageDiv.appendChild(hlCanvas);
-            const hlContext = hlCanvas.getContext("2d");
-            let isDragging = false, startX = 0, startY = 0;
-            hlCanvas.addEventListener("mousedown", function(e) {
-              isDragging = true;
-              const rect = hlCanvas.getBoundingClientRect();
-              startX = e.clientX - rect.left;
-              startY = e.clientY - rect.top;
-              hlContext.clearRect(0, 0, hlCanvas.width, hlCanvas.height);
-            });
-            hlCanvas.addEventListener("mousemove", function(e) {
-              if (!isDragging) return;
-              const rect = hlCanvas.getBoundingClientRect();
-              const currentX = e.clientX - rect.left;
-              const currentY = e.clientY - rect.top;
-              const width = currentX - startX;
-              const height = currentY - startY;
-              hlContext.clearRect(0, 0, hlCanvas.width, hlCanvas.height);
-              hlContext.fillStyle = "rgba(255,255,0,0.4)";
-              hlContext.fillRect(startX, startY, width, height);
-              hlContext.strokeStyle = "yellow";
-              hlContext.lineWidth = 1;
-              hlContext.strokeRect(startX, startY, width, height);
-            });
-            hlCanvas.addEventListener("mouseup", function(e) {
-              if (isDragging) {
-                isDragging = false;
-                const rect = hlCanvas.getBoundingClientRect();
-                const endX = e.clientX - rect.left;
-                const endY = e.clientY - rect.top;
-                const region = {
-                  x: Math.min(startX, endX),
-                  y: Math.min(startY, endY),
-                  width: Math.abs(endX - startX),
-                  height: Math.abs(endY - startY)
-                };
-                if (!highlightRegions[pageNum]) { highlightRegions[pageNum] = []; }
-                highlightRegions[pageNum].push(region);
-                console.log("Highlight on page", pageNum, ":", region);
-              }
-            });
-            container.appendChild(pageDiv);
-          });
-        }
-      }
-      
-      // Function to extract text from highlighted regions.
-      function extractHighlightedText() {
-        let contextText = "";
-        for (let pageNum in highlightRegions) {
-          const regions = highlightRegions[pageNum];
-          const textContent = pdfTextContents[pageNum];
-          if (!textContent) continue;
-          textContent.items.forEach(item => {
-            let tx = item.transform[4];
-            let ty = item.transform[5];
-            let fontSize = item.transform[3] || 10;
-            let itemBox = { x: tx, y: ty - fontSize, width: item.width || 50, height: fontSize };
-            regions.forEach(region => {
-              if (itemBox.x >= region.x && (itemBox.x + itemBox.width) <= (region.x + region.width) &&
-                  itemBox.y >= region.y && (itemBox.y + itemBox.height) <= (region.y + region.height)) {
-                contextText += item.str + " ";
-              }
-            });
-          });
-        }
-        return contextText.trim();
-      }
-      
-      window.restoreGraphView = function() {
-        const overlay = document.getElementById("pdfOverlay");
-        if (overlay) { overlay.remove(); }
-      };
-      
+
       window.fetchPaperDetails = function(title) {
         currentPaperTitle = title;
         document.getElementById("paperContent").innerHTML = `<p>Loading details for "${title}"...</p>`;
@@ -541,9 +379,10 @@
               document.getElementById("paperContent").innerHTML = `<h2>${title}</h2><p>${data.error}</p>`;
               return;
             }
-            const pdfURL = data.pdf_link || data.alternate_link;
-            const paperLink = data.alternate_link !== "" ? data.alternate_link : "https://www.google.com/search?q=" + encodeURIComponent(data.title);
-            let content = `<h2><a href="#" id="titleLink" class="hover:underline">${data.title}</a></h2>
+            const paperLink = data.alternate_link !== ""
+              ? data.alternate_link
+              : "https://www.google.com/search?q=" + encodeURIComponent(data.title);
+            let content = `<h2><a href="${paperLink}" target="_blank" class="hover:underline">${data.title}</a></h2>
                            <div class="action-buttons">
                              <button onclick="savePaper('${data.title}')">Save Paper</button>
                              <button onclick="followAuthors('${data.authors}')">Follow Authors</button>
@@ -556,7 +395,9 @@
                 authorsHTML += `<a href="https://scholar.google.com/scholar?q=${encodeURIComponent(trimmed)}" target="_blank" class="hover:underline">${trimmed}</a>, `;
               });
               authorsHTML = authorsHTML.slice(0, -2);
-            } else { authorsHTML = "No authors extracted."; }
+            } else {
+              authorsHTML = "No authors extracted.";
+            }
             content += `<p><strong>ID:</strong> ${data.id}</p>
                         <p><strong>Updated:</strong> ${data.updated}</p>
                         <p><strong>Published:</strong> ${data.published}</p>
@@ -567,32 +408,17 @@
                         <p><strong>DOI:</strong> ${data.doi}</p>
                         <p><strong>Primary Category:</strong> ${data.primary_category}</p>
                         <p><strong>Categories:</strong> ${data.categories}</p>
-                        <p><strong>Alternate Link:</strong> <a href="${paperLink}" target="_blank">${paperLink || "Google Search"}</a></p>
-                        <p><strong>PDF Link:</strong> <a href="#" id="pdfLink">${pdfURL}</a></p>`;
+                        <p><strong>Alternate Link:</strong> <a href="${data.alternate_link}" target="_blank">${data.alternate_link || "Google Search"}</a></p>
+                        <p><strong>PDF Link:</strong> <a href="${data.pdf_link}" target="_blank">${data.pdf_link}</a></p>`;
             document.getElementById("paperContent").innerHTML = content;
-            const titleLink = document.getElementById("titleLink");
-            if(titleLink) {
-              titleLink.addEventListener("click", function(e) {
-                e.preventDefault();
-                console.log("Title link clicked. Loading PDF:", pdfURL);
-                loadPDFInGraph(pdfURL);
-              });
-            }
-            const pdfLink = document.getElementById("pdfLink");
-            if(pdfLink) {
-              pdfLink.addEventListener("click", function(e) {
-                e.preventDefault();
-                console.log("PDF link clicked. Loading PDF:", pdfURL);
-                loadPDFInGraph(pdfURL);
-              });
-            }
           })
           .catch(error => {
             console.error('Error fetching paper details:', error);
             document.getElementById("paperContent").innerHTML = `<h2>${title}</h2><p>Error loading details.</p>`;
           });
       };
-      
+
+      // Chat input event listener.
       document.getElementById("chatInput").addEventListener("keydown", function(e) {
         if(e.key === "Enter" && !e.shiftKey) {
           e.preventDefault();
@@ -602,8 +428,10 @@
           conv.innerHTML += `<div class="message user">You: ${msg}</div>`;
           this.value = "";
           conv.scrollTop = conv.scrollHeight;
+          // When the user types, update the active chat note and move it to the top.
           if(activeChatNote) {
             activeChatNote.dataset.chat = conv.innerHTML;
+            // If the note still says "New Chat" and a paper title is available, update it.
             if(activeChatNote.textContent === "New Chat" && currentPaperTitle) {
               activeChatNote.textContent = currentPaperTitle;
             }
@@ -627,6 +455,7 @@
               if(activeChatNote) {
                 activeChatNote.dataset.chat = conv.innerHTML;
                 saveChatHistory();
+                // Move activeChatNote to top after new input.
                 const chatHistoryList = document.getElementById("chatHistoryList");
                 chatHistoryList.insertBefore(activeChatNote, chatHistoryList.firstChild);
               }
@@ -642,14 +471,14 @@
           }
         }
       });
-      
+
+      // Hide the loading overlay when everything is loaded.
       window.addEventListener('load', async () => {
-        try {
-          await Clerk.load();
-        } catch (err) {
-          console.error("Error loading Clerk:", err);
-        } finally {
-          document.getElementById("loadingOverlay").style.display = "none";
+        try { 
+          await Clerk.load(); 
+        } catch (err) { 
+          console.error("Error loading Clerk:", err); 
+          return; 
         }
         const navUserContainer = document.getElementById('nav-user');
         if (Clerk.user && navUserContainer) {
@@ -664,9 +493,8 @@
         document.getElementById('favoritesButton').addEventListener("click", showFavoritesPopup);
         document.getElementById('notificationIcon').addEventListener("click", showNotificationsPopup);
         document.getElementById("newChatIcon").addEventListener("click", createNewChat);
-        
-        // Fallback: hide loading overlay after 5 seconds if still visible.
-        setTimeout(() => { document.getElementById("loadingOverlay").style.display = "none"; }, 5000);
+        // Hide loading overlay once all elements are ready.
+        document.getElementById("loadingOverlay").style.display = "none";
       });
     </script>
   </head>
@@ -698,7 +526,7 @@
       </h2>
       <div id="chatHistoryList"></div>
     </div>
-    <!-- Center Container: Graph (always loaded) with PDF overlay on top -->
+    <!-- Center Container: Interactive Plot -->
     <div id="centerContainer">
       <iframe src="/plot"></iframe>
     </div>
