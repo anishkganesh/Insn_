@@ -8,7 +8,7 @@
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3EI%3C/text%3E%3C/svg%3E">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Raleway Font (only) -->
+    <!-- Raleway Font -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" />
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -27,79 +27,52 @@
         --insn-msg-bg: #fff9c4;
         --icon-border: 1px solid var(--accent-color);
       }
-      /* Global resets and fonts using Raleway only */
       html, body { margin: 0; height: 100%; font-family: 'Raleway', sans-serif; }
       body { background: var(--bg-color); overflow: hidden; }
-      
       /* Loading overlay */
       #loadingOverlay {
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(255,255,255,0.8);
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center;
         z-index: 2000;
       }
       .spinner {
-        border: 8px solid #f3f3f3;
-        border-top: 8px solid var(--accent-color);
-        border-radius: 50%;
-        width: 60px;
-        height: 60px;
-        animation: spin 1s linear infinite;
+        border: 8px solid #f3f3f3; border-top: 8px solid var(--accent-color);
+        border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite;
       }
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-      
-      /* Top Navigation */
+      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      /* Top navigation */
       #topNav {
         position: fixed; top: 0; left: 0; right: 0; height: 60px;
         background: var(--panel-bg); display: flex; justify-content: space-between; align-items: center;
         padding: 0 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 1100;
       }
       #topNav .brand {
-        font-size: 1.5rem; /* Reduced from 1.75rem */
-        font-weight: 700;
+        font-size: 1.5rem; font-weight: 700;
         background: linear-gradient(90deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
-        background-size: 200% 200%;
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        background-size: 200% 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         animation: gradientAnimation 5s ease infinite;
       }
-      @keyframes gradientAnimation {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-      }
+      @keyframes gradientAnimation { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
       #topRightIcons { display: flex; gap: 10px; align-items: center; position: relative; }
       .icon-button {
         width: 30px; height: 30px; padding: 4px; background: var(--panel-bg);
         border: var(--icon-border); border-radius: 50%; color: var(--accent-color);
-        display: inline-flex; align-items: center; justify-content: center;
-        cursor: pointer; transition: transform 0.3s ease; position: relative;
+        display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+        transition: transform 0.3s ease; position: relative;
       }
       .icon-button:hover { transform: scale(1.1); }
       .badge {
-        background: var(--success-color);
-        color: white;
-        border-radius: 50%;
-        padding: 2px 6px;
-        font-size: 0.75rem;
-        position: absolute;
-        top: -5px;
-        right: -5px;
+        background: var(--success-color); color: white; border-radius: 50%;
+        padding: 2px 6px; font-size: 0.75rem; position: absolute; top: -5px; right: -5px;
       }
-      
-      /* Sidebar & Container Layout */
+      /* Sidebar & layout */
       #chatHistoryPanel {
         position: fixed; top: 60px; left: 0; width: 250px; bottom: 0;
         background: var(--panel-bg-alt); border-right: 1px solid #e5e7eb;
         overflow-y: auto; padding: 10px; box-sizing: border-box; z-index: 900;
       }
-      #chatHistoryPanel h2 {
-        font-size: 1.1rem; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
+      #chatHistoryPanel h2 { font-size: 1.1rem; margin-bottom: 10px;
+        display: flex; justify-content: space-between; align-items: center;
       }
       .chat-note {
         font-size: 0.9rem; margin-bottom: 6px; padding: 8px;
@@ -107,6 +80,7 @@
         background: var(--panel-bg); cursor: pointer; transition: background 0.3s;
       }
       .chat-note:hover { background: #f0f0f0; }
+      /* Center container (graph view) */
       #centerContainer {
         position: absolute; top: 60px; left: 250px; right: 520px; bottom: 0;
         background: var(--graph-bg); overflow: auto;
@@ -117,8 +91,7 @@
         background: var(--panel-bg); border-left: 1px solid #e5e7eb;
         display: flex; flex-direction: column; z-index: 1000;
       }
-      
-      /* Paper Details Section */
+      /* Paper details section */
       #paperDetails { flex: 1; padding: 20px; overflow-y: auto; border-bottom: 1px solid #e5e7eb; }
       #paperDetails h2 { font-size: 1.2rem; color: var(--accent-color); margin-top: 0; }
       .action-buttons { margin: 10px 0; }
@@ -128,8 +101,7 @@
         color: var(--accent-color); cursor: pointer; transition: background 0.3s;
       }
       .action-buttons button:hover { background: var(--accent-color); color: #fff; }
-      
-      /* Chat Panel */
+      /* Chat panel */
       #chatPanel { padding: 20px; display: flex; flex-direction: column; }
       #chatPanel h2 { font-size: 1.2rem; color: var(--accent-color); margin-top: 0; }
       #chatConversation {
@@ -144,19 +116,13 @@
         width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 4px;
         outline: none; font-size: 1rem;
       }
-      
-      /* Modern Popup (Favorites & Recommendations) */
+      /* Favorites/Recommendations Popup (z-index 1900 to appear above PDF overlay) */
       #favoritesPopup {
         position: fixed; top: 50%; left: 50%;
         transform: translate(-50%, -50%);
-        background: var(--panel-bg);
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        z-index: 1300;
-        display: none;
-        max-height: 80%;
-        overflow-y: auto;
+        background: var(--panel-bg); padding: 20px; border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 1900;
+        display: none; max-height: 80%; overflow-y: auto;
       }
       #favoritesPopup h3 { margin-top: 0; font-size: 1.25rem; }
       #favoritesPopup ul { list-style: none; padding-left: 0; }
@@ -165,24 +131,65 @@
         position: absolute; top: 8px; right: 12px;
         cursor: pointer; font-size: 1.2rem; color: var(--accent-color);
       }
-      
-      /* Thinking Popup */
+      /* Thinking popup (z-index 1800) */
       #thinkingPopup {
         position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
         padding: 8px 16px; border-radius: 4px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        font-size: 0.95rem; display: none; z-index: 1200;
-        color: white;
+        font-size: 0.95rem; display: none; z-index: 1800; color: white;
+      }
+      /* PDF overlay: covers only the center container */
+      #pdfOverlay {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: #fff; z-index: 1600; display: none; overflow: auto;
+      }
+      /* PDF container: center the PDF */
+      #pdfContainer {
+        display: flex; justify-content: center; align-items: center;
+        width: 100%; height: calc(100% - 50px); overflow: auto;
+      }
+      /* Old PDF viewer: using an iframe loaded via proxy (for same-origin) */
+      #pdfIframe {
+        width: 80%; height: 100%; border: none; transform-origin: top left;
+        display: block; margin: auto;
+      }
+      /* PDF overlay controls (laid out cleanly) */
+      .pdf-controls {
+        padding: 10px; background: #f0f0f0;
+        display: flex; justify-content: flex-end; align-items: center;
+        gap: 10px; flex-wrap: wrap;
+      }
+      .pdf-controls button {
+        padding: 8px 16px; background: var(--accent-color);
+        color: #fff; border: none; border-radius: 4px; cursor: pointer;
+        transition: opacity 0.2s;
+      }
+      .pdf-controls button:hover { opacity: 0.9; }
+      .pdf-controls .zoom-in-icon::before {
+        content: "\f067"; font-family: "Font Awesome 6 Free"; font-weight: 900;
+      }
+      .pdf-controls .zoom-out-icon::before {
+        content: "\f068"; font-family: "Font Awesome 6 Free"; font-weight: 900;
+      }
+      /* Custom green popup for context confirmation */
+      #customPopup {
+        display: none; position: absolute; top: 10px; left: 50%;
+        transform: translateX(-50%); background: #4CAF50; color: white;
+        padding: 10px 20px; border-radius: 5px; z-index: 1700;
       }
     </style>
     <script type="module">
-      // Global variables.
+      // Global variables for PDF scaling.
+      let currentPDFScale = 1.0;  // Default zoom 1.0
+      let currentPDFLink = "";
+
+      // Global UI variables.
       let savedPapers = [];
       let followedAuthors = [];
       let currentPaperTitle = "";
       let recommendations = { papers: [], authors: [] };
-      let activeChatNote = null;  // Track the currently active chat note.
+      let activeChatNote = null;
 
-      // Load persistent data from localStorage based on Clerk user ID.
+      // Load persistent data from localStorage.
       function loadPersistentData() {
         if (Clerk.user?.id) {
           const papers = localStorage.getItem('savedPapers_' + Clerk.user.id);
@@ -199,7 +206,7 @@
         }
       }
 
-      // Expose functions to the global window object.
+      // Show thinking popup (z-index 1800)
       window.showThinkingPopup = function(show, message, color) {
         const popup = document.getElementById("thinkingPopup");
         if (show) {
@@ -214,9 +221,7 @@
       window.savePaper = function(title) {
         window.showThinkingPopup(true, "Saving paper...");
         setTimeout(() => {
-          if (!savedPapers.includes(title)) {
-            savedPapers.push(title);
-          }
+          if (!savedPapers.includes(title)) { savedPapers.push(title); }
           window.showThinkingPopup(true, "Paper saved!", "var(--success-color)");
           setTimeout(() => { window.showThinkingPopup(false); }, 1500);
           updatePersistentData();
@@ -229,9 +234,7 @@
         setTimeout(() => {
           authors.split(",").forEach(author => {
             const trimmed = author.trim();
-            if (trimmed && !followedAuthors.includes(trimmed)) {
-              followedAuthors.push(trimmed);
-            }
+            if (trimmed && !followedAuthors.includes(trimmed)) { followedAuthors.push(trimmed); }
           });
           window.showThinkingPopup(true, "Authors followed!", "var(--success-color)");
           setTimeout(() => { window.showThinkingPopup(false); }, 1500);
@@ -247,7 +250,6 @@
         note.textContent = "New Chat";
         note.className = "chat-note";
         note.dataset.chat = conv.innerHTML;
-        // When a chat note is clicked, load its conversation but do not change its order.
         note.addEventListener('click', function() {
           document.getElementById("chatConversation").innerHTML = this.dataset.chat;
           document.getElementById("chatConversation").scrollTop = document.getElementById("chatConversation").scrollHeight;
@@ -259,7 +261,7 @@
           saveChatHistory();
         });
         document.getElementById("chatHistoryList").insertBefore(note, document.getElementById("chatHistoryList").firstChild);
-        activeChatNote = note;  // Set new chat as the active one.
+        activeChatNote = note;
         saveChatHistory();
       };
 
@@ -269,7 +271,6 @@
         }
       }
 
-      // Update recommendations using /get_recommendations endpoint.
       function updateRecommendations() {
         fetch("/get_recommendations", {
           method: "POST",
@@ -278,22 +279,14 @@
         })
         .then(response => response.json())
         .then(data => {
-          // Filter out duplicate authors.
           let uniqueAuthors = [];
-          data.authors.forEach(item => {
-            if (!uniqueAuthors.some(a => a.name === item.name)) {
-              uniqueAuthors.push(item);
-            }
-          });
+          data.authors.forEach(item => { if (!uniqueAuthors.some(a => a.name === item.name)) { uniqueAuthors.push(item); } });
           recommendations = { papers: data.papers, authors: uniqueAuthors };
           updateNotificationBadge();
         })
-        .catch(error => {
-          console.error("Error updating recommendations:", error);
-        });
+        .catch(error => { console.error("Error updating recommendations:", error); });
       }
 
-      // Update the notification badge on the notification icon.
       function updateNotificationBadge() {
         const notifIcon = document.getElementById("notificationIcon");
         let count = (recommendations.papers ? recommendations.papers.length : 0) +
@@ -305,28 +298,48 @@
         }
       }
 
-      // Show the notifications popup with recommendations.
+      // Fetch latest papers (using new /latest_papers endpoint)
+      async function fetchLatestPapers() {
+        try {
+          const response = await fetch("/latest_papers");
+          const data = await response.json();
+          if (data.papers && data.papers.length > 0) {
+            // Add "Latest" label to each new paper
+            let content = `<h3>Latest Research</h3><ul>`;
+            data.papers.forEach(item => {
+              content += `<li><a href="#" onclick="document.getElementById('favoritesPopup').style.display='none'; loadPdfOverlay('${item.url}'); return false;">${item.title} <span class="text-green-600 text-xs">(Latest)</span></a></li>`;
+            });
+            content += `</ul>`;
+            // Display these in the notifications popup
+            const notifPopup = document.getElementById("favoritesPopup");
+            notifPopup.innerHTML = content + `<span class="close-btn" id="closeNotifBtn">×</span>`;
+            notifPopup.style.display = "block";
+            document.getElementById("closeNotifBtn").addEventListener("click", () => {
+              notifPopup.style.display = "none";
+            });
+          }
+        } catch (e) {
+          console.error("Error fetching latest papers:", e);
+        }
+      }
+
       function showNotificationsPopup() {
         const notifPopup = document.getElementById("favoritesPopup");
         let content = `<h3>Recommendations</h3>`;
         if (recommendations.papers && recommendations.papers.length > 0) {
           content += `<strong>New Papers:</strong><ul>`;
           recommendations.papers.forEach(item => {
-            content += `<li><a href="#" onclick="fetchPaperDetails('${item.title}'); return false;">${item.title}</a></li>`;
+            content += `<li><a href="#" onclick="document.getElementById('favoritesPopup').style.display='none'; loadPdfOverlay('${item.url}'); return false;">${item.title}</a></li>`;
           });
           content += `</ul>`;
-        } else {
-          content += `<p>No new paper recommendations.</p>`;
-        }
+        } else { content += `<p>No new paper recommendations.</p>`; }
         if (recommendations.authors && recommendations.authors.length > 0) {
           content += `<strong>New Authors:</strong><ul>`;
           recommendations.authors.forEach(item => {
             content += `<li><a href="${item.url}" target="_blank">${item.name}</a></li>`;
           });
           content += `</ul>`;
-        } else {
-          content += `<p>No new author recommendations.</p>`;
-        }
+        } else { content += `<p>No new author recommendations.</p>`; }
         notifPopup.innerHTML = content + `<span class="close-btn" id="closeNotifBtn">×</span>`;
         notifPopup.style.display = "block";
         document.getElementById("closeNotifBtn").addEventListener("click", () => {
@@ -336,7 +349,6 @@
         });
       }
 
-      // Override favoritesButton click to show the favorites popup.
       function showFavoritesPopup() {
         const favPopup = document.getElementById("favoritesPopup");
         let content = `<h3>Favorites</h3>
@@ -344,13 +356,10 @@
         if (savedPapers.length) {
           content += `<ul>`;
           savedPapers.forEach(paper => {
-            const link = "https://scholar.google.com/scholar?q=" + encodeURIComponent(paper);
-            content += `<li><a href="${link}" target="_blank">${paper}</a></li>`;
+            content += `<li><a href="#" onclick="document.getElementById('favoritesPopup').style.display='none'; loadPdfFromTitle('${paper}'); return false;">${paper}</a></li>`;
           });
           content += `</ul>`;
-        } else {
-          content += `<p>No saved papers yet.</p>`;
-        }
+        } else { content += `<p>No saved papers yet.</p>`; }
         content += `<strong>Followed Authors:</strong>`;
         if (followedAuthors.length) {
           content += `<ul>`;
@@ -359,9 +368,7 @@
             content += `<li><a href="${link}" target="_blank">${author}</a></li>`;
           });
           content += `</ul>`;
-        } else {
-          content += `<p>No authors followed yet.</p>`;
-        }
+        } else { content += `<p>No authors followed yet.</p>`; }
         favPopup.innerHTML = content + `<span class="close-btn" id="closeFavBtn">×</span>`;
         favPopup.style.display = "block";
         document.getElementById("closeFavBtn").addEventListener("click", () => {
@@ -379,10 +386,7 @@
               document.getElementById("paperContent").innerHTML = `<h2>${title}</h2><p>${data.error}</p>`;
               return;
             }
-            const paperLink = data.alternate_link !== ""
-              ? data.alternate_link
-              : "https://www.google.com/search?q=" + encodeURIComponent(data.title);
-            let content = `<h2><a href="${paperLink}" target="_blank" class="hover:underline">${data.title}</a></h2>
+            let content = `<h2><a href="#" onclick="loadPdfOverlay('${data.pdf_link}'); document.getElementById('favoritesPopup').style.display='none'; return false;" class="hover:underline">${data.title}</a></h2>
                            <div class="action-buttons">
                              <button onclick="savePaper('${data.title}')">Save Paper</button>
                              <button onclick="followAuthors('${data.authors}')">Follow Authors</button>
@@ -395,9 +399,7 @@
                 authorsHTML += `<a href="https://scholar.google.com/scholar?q=${encodeURIComponent(trimmed)}" target="_blank" class="hover:underline">${trimmed}</a>, `;
               });
               authorsHTML = authorsHTML.slice(0, -2);
-            } else {
-              authorsHTML = "No authors extracted.";
-            }
+            } else { authorsHTML = "No authors extracted."; }
             content += `<p><strong>ID:</strong> ${data.id}</p>
                         <p><strong>Updated:</strong> ${data.updated}</p>
                         <p><strong>Published:</strong> ${data.published}</p>
@@ -409,7 +411,7 @@
                         <p><strong>Primary Category:</strong> ${data.primary_category}</p>
                         <p><strong>Categories:</strong> ${data.categories}</p>
                         <p><strong>Alternate Link:</strong> <a href="${data.alternate_link}" target="_blank">${data.alternate_link || "Google Search"}</a></p>
-                        <p><strong>PDF Link:</strong> <a href="${data.pdf_link}" target="_blank">${data.pdf_link}</a></p>`;
+                        <p><strong>PDF Link:</strong> <a href="#" onclick="loadPdfOverlay('${data.pdf_link}'); document.getElementById('favoritesPopup').style.display='none'; return false;">${data.pdf_link}</a></p>`;
             document.getElementById("paperContent").innerHTML = content;
           })
           .catch(error => {
@@ -418,7 +420,78 @@
           });
       };
 
-      // Chat input event listener.
+      window.loadPdfFromTitle = function(title) {
+        fetch('/get_arxiv_details?title=' + encodeURIComponent(title))
+          .then(response => response.json())
+          .then(data => {
+            if (data.pdf_link) { loadPdfOverlay(data.pdf_link); }
+            else { showCustomPopup("PDF link not found for this paper.", true); }
+          })
+          .catch(error => { console.error("Error fetching PDF details:", error); showCustomPopup("Error loading PDF.", true); });
+      };
+
+      // Load PDF via proxy so it is same-origin.
+      window.loadPdfOverlay = function(pdfLink) {
+        const proxiedLink = "/proxy?url=" + encodeURIComponent(pdfLink) + "#toolbar=0&navpanes=0";
+        currentPDFLink = proxiedLink;
+        currentPDFScale = 1.0;
+        const pdfIframe = document.getElementById("pdfIframe");
+        pdfIframe.style.transform = "scale(" + currentPDFScale + ")";
+        pdfIframe.src = proxiedLink;
+        document.getElementById("pdfOverlay").style.display = "block";
+      };
+
+      // Zoom functions
+      window.zoomIn = function() {
+        currentPDFScale *= 1.1;
+        document.getElementById("pdfIframe").style.transform = "scale(" + currentPDFScale + ")";
+      };
+      window.zoomOut = function() {
+        currentPDFScale /= 1.1;
+        document.getElementById("pdfIframe").style.transform = "scale(" + currentPDFScale + ")";
+      };
+
+      // Custom popup for context confirmation.
+      function showCustomPopup(message, isError) {
+        const popup = document.getElementById("customPopup");
+        popup.textContent = message;
+        popup.style.background = isError ? "#D32F2F" : "#4CAF50";
+        popup.style.display = "block";
+        setTimeout(() => { popup.style.display = "none"; }, 2500);
+      }
+
+      // WORKAROUND for “Add Highlight as Context”: try PDF iframe selection then clipboard.
+      async function getClipboardText() {
+        try {
+          return await navigator.clipboard.readText();
+        } catch (e) {
+          console.error("Clipboard read failed:", e);
+          return "";
+        }
+      }
+      async function addHighlightedTextAsContext() {
+        let selectedText = "";
+        const pdfIframe = document.getElementById("pdfIframe");
+        try {
+          selectedText = pdfIframe.contentWindow.getSelection().toString().trim();
+        } catch (e) {
+          console.error("Could not access PDF iframe selection:", e);
+        }
+        if (!selectedText) {
+          selectedText = await getClipboardText();
+        }
+        if (!selectedText) {
+          selectedText = window.getSelection().toString().trim();
+        }
+        if (selectedText) {
+          const chatInput = document.getElementById("chatInput");
+          chatInput.value += "\nContext: " + selectedText;
+          showCustomPopup("PDF text added to chat context!");
+        } else {
+          showCustomPopup("No PDF text detected. Please copy the text (Ctrl+C) then click the button.", true);
+        }
+      }
+
       document.getElementById("chatInput").addEventListener("keydown", function(e) {
         if(e.key === "Enter" && !e.shiftKey) {
           e.preventDefault();
@@ -428,10 +501,8 @@
           conv.innerHTML += `<div class="message user">You: ${msg}</div>`;
           this.value = "";
           conv.scrollTop = conv.scrollHeight;
-          // When the user types, update the active chat note and move it to the top.
           if(activeChatNote) {
             activeChatNote.dataset.chat = conv.innerHTML;
-            // If the note still says "New Chat" and a paper title is available, update it.
             if(activeChatNote.textContent === "New Chat" && currentPaperTitle) {
               activeChatNote.textContent = currentPaperTitle;
             }
@@ -455,7 +526,6 @@
               if(activeChatNote) {
                 activeChatNote.dataset.chat = conv.innerHTML;
                 saveChatHistory();
-                // Move activeChatNote to top after new input.
                 const chatHistoryList = document.getElementById("chatHistoryList");
                 chatHistoryList.insertBefore(activeChatNote, chatHistoryList.firstChild);
               }
@@ -472,14 +542,30 @@
         }
       });
 
-      // Hide the loading overlay when everything is loaded.
-      window.addEventListener('load', async () => {
-        try { 
-          await Clerk.load(); 
-        } catch (err) { 
-          console.error("Error loading Clerk:", err); 
-          return; 
+      async function fetchLatestResearch() {
+        try {
+          const response = await fetch("/latest_papers");
+          const data = await response.json();
+          if (data.papers && data.papers.length > 0) {
+            let content = `<h3>Latest Research</h3><ul>`;
+            data.papers.forEach(item => {
+              content += `<li><a href="#" onclick="document.getElementById('favoritesPopup').style.display='none'; loadPdfOverlay('${item.url}'); return false;">${item.title} <span class="text-green-600 text-xs">(Latest)</span></a></li>`;
+            });
+            content += `</ul>`;
+            const notifPopup = document.getElementById("favoritesPopup");
+            notifPopup.innerHTML = content + `<span class="close-btn" id="closeNotifBtn">×</span>`;
+            notifPopup.style.display = "block";
+            document.getElementById("closeNotifBtn").addEventListener("click", () => {
+              notifPopup.style.display = "none";
+            });
+          }
+        } catch(e) {
+          console.error("Error fetching latest research:", e);
         }
+      }
+
+      window.addEventListener('load', async () => {
+        try { await Clerk.load(); } catch (err) { console.error("Error loading Clerk:", err); return; }
         const navUserContainer = document.getElementById('nav-user');
         if (Clerk.user && navUserContainer) {
           navUserContainer.innerHTML = "";
@@ -493,8 +579,14 @@
         document.getElementById('favoritesButton').addEventListener("click", showFavoritesPopup);
         document.getElementById('notificationIcon').addEventListener("click", showNotificationsPopup);
         document.getElementById("newChatIcon").addEventListener("click", createNewChat);
-        // Hide loading overlay once all elements are ready.
+        document.getElementById("closePdfButton").addEventListener("click", function() {
+          document.getElementById("pdfOverlay").style.display = "none";
+        });
+        document.getElementById("addContextButton").addEventListener("click", addHighlightedTextAsContext);
+        document.getElementById("zoomInButton").addEventListener("click", zoomIn);
+        document.getElementById("zoomOutButton").addEventListener("click", zoomOut);
         document.getElementById("loadingOverlay").style.display = "none";
+        fetchLatestResearch();
       });
     </script>
   </head>
@@ -507,6 +599,8 @@
     <div id="thinkingPopup"></div>
     <!-- Favorites/Recommendations Popup -->
     <div id="favoritesPopup"></div>
+    <!-- Custom Popup for Context Confirmation -->
+    <div id="customPopup"></div>
     <!-- Top Navigation Bar -->
     <div id="topNav" class="flex justify-between items-center">
       <div class="brand">Insn</div>
@@ -526,9 +620,21 @@
       </h2>
       <div id="chatHistoryList"></div>
     </div>
-    <!-- Center Container: Interactive Plot -->
+    <!-- Center Container: Interactive Plot (Graph View) -->
     <div id="centerContainer">
       <iframe src="/plot"></iframe>
+      <!-- PDF Overlay (covers center area) -->
+      <div id="pdfOverlay">
+        <div class="pdf-controls">
+          <button id="addContextButton" class="close-pdf-button">Add Highlight as Context</button>
+          <button id="zoomInButton" class="close-pdf-button zoom-in-icon"></button>
+          <button id="zoomOutButton" class="close-pdf-button zoom-out-icon"></button>
+          <button id="closePdfButton" class="close-pdf-button">Back to Graph</button>
+        </div>
+        <div id="pdfContainer">
+          <iframe id="pdfIframe" src=""></iframe>
+        </div>
+      </div>
     </div>
     <!-- Right Panel: Paper Details & Deep Research Chat -->
     <div id="rightPanel">
