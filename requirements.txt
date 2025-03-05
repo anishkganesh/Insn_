@@ -8,5 +8,4 @@ requests==2.25.1
 datamapplot==0.5.1
 arxiv
 openai==0.28
-numpy
 bs4
