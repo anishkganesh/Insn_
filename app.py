@@ -9,6 +9,7 @@ import datamapplot, arxiv, openai
 from requests.adapters import HTTPAdapter
 from difflib import SequenceMatcher
 from bs4 import BeautifulSoup
+import random  # For extra recommendations
 
 app = Flask(__name__)
 
@@ -172,9 +173,10 @@ def ask_paper():
     if paper_details["published"]:
         let_context += "\nPublished: " + paper_details["published"]
     prompt = (
-        "You are an expert research assistant. Using the paper details provided below as context, answer the following research question. "
-        "For every sentence in your answer, include an inline citation in the format [Source: <Field>], where <Field> is one of: Title, Authors, DOI, Abstract, or Published. "
-        "Your answer must be fully annotated with these citations.\n\n"
+        "Using the paper details provided below as context, answer the following research question. "
+        "For every sentence in your answer, include an inline citation formatted as a numbered hyperlink (for example, <a href='URL'>[1]</a>). "
+        "Each citation must correspond to one of the following fields: Title, Authors, DOI, Abstract, or Published. "
+        "If a citation is not already a hyperlink, manually hyperlink it to an appropriate source (for example, link 'Title' to a Google Scholar search for the title).\n\n"
         "Paper Details:\n" + let_context + "\n\n"
         "Question: " + question
     )
@@ -182,13 +184,14 @@ def ask_paper():
         completion = openai.ChatCompletion.create(
             model="gpt-4-0613",
             messages=[
-                {"role": "system", "content": "You are an expert research assistant who always includes inline citations for every sentence based on the paper details provided."},
+                {"role": "system", "content": "You are an expert research assistant. Answer the research question using the provided paper details as context. For every sentence in your answer, include an inline citation formatted as a numbered hyperlink (e.g. <a href='URL'>[1]</a>, <a href='URL'>[2]</a>, etc.). Each citation must correspond to one of the following fields: Title, Authors, DOI, Abstract, or Published. If a citation is not already a hyperlink, manually hyperlink it to an appropriate source (for example, link 'Title' to a Google Scholar search for the title)."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=200
         )
         final_response = completion.choices[0].message.content
-        citations = re.findall(r'\[Source:\s*(.*?)\]', final_response)
+        # Extract citations that are hyperlinked in the format: <a href="URL">[number]</a>
+        citations = re.findall(r'<a\s+href="([^"]+)">\[(\d+)\]</a>', final_response)
     except Exception as e:
         final_response = f"Error retrieving response from OpenAI: {str(e)}"
         citations = []
@@ -204,6 +207,7 @@ def get_recommendations():
     Receives saved papers and followed authors (only the most recent two of each),
     then queries the Semantic Scholar API for similar items.
     Filters out items that the user has already read or followed.
+    Additionally, occasionally recommend items based on the user's reading habits.
     """
     data = request.get_json()
     saved = data.get("savedPapers", [])
@@ -250,6 +254,24 @@ def get_recommendations():
                         rec_authors[name_rec] = url_rec
         except Exception as e:
             print("Error in recommendation for author:", author, e)
+
+    # Occasionally add an extra recommendation based on the user's reading habits.
+    if saved:
+        random_saved = random.choice(saved)
+        url_extra = f"https://api.semanticscholar.org/graph/v1/paper/search?query={random_saved}&limit=1&fields=title,url,year"
+        try:
+            response = requests.get(url_extra, timeout=5)
+            if response.status_code == 200:
+                results = response.json().get("data", [])
+                if results:
+                    item = results[0]
+                    title_rec = item.get("title")
+                    url_rec = item.get("url")
+                    year = item.get("year")
+                    if title_rec and url_rec and title_rec not in saved and title_rec not in rec_papers:
+                        rec_papers[title_rec] = {"url": url_rec, "year": year}
+        except Exception as e:
+            print("Error in extra recommendation for reading habits:", e)
 
     # Sort the recommended papers by year (newest first)
     sorted_papers = sorted(rec_papers.items(), key=lambda x: x[1].get("year", 0), reverse=True)
