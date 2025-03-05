@@ -35,6 +35,7 @@ def create_plot():
         arxivml_label_layers.append(np.load(io.BytesIO(label_file.content), allow_pickle=True))
     hover_data_file = fetch_url(f"{base_url}/raw/interactive/examples/arxiv_ml_hover_data.npy")
     arxiv_hover_data = np.load(io.BytesIO(hover_data_file.content), allow_pickle=True)
+    # Use a modern font for the graph
     plot = datamapplot.create_interactive_plot(
         arxivml_data_map,
         arxivml_label_layers[0],
@@ -61,15 +62,6 @@ def landing():
 def main_app():
     return render_template("index.html")
 
-def best_match(title, candidates, threshold=0.5):
-    best_candidate, best_ratio = None, 0.0
-    for candidate in candidates:
-        ratio = SequenceMatcher(None, title.lower(), candidate.title.lower()).ratio()
-        if ratio > best_ratio:
-            best_ratio = ratio
-            best_candidate = candidate
-    return best_candidate if best_ratio >= threshold else None
-
 def search_variant(query, title):
     try:
         search = arxiv.Search(
@@ -91,25 +83,34 @@ def search_variant(query, title):
         return None, 0.0
 
 def query_arxiv_by_title_fast(title):
+    # Try a looser query based on a partial title first.
+    words = title.split()
+    if len(words) > 3:
+        partial_title = " ".join(words[:min(5, len(words))])
+        looser_query = f'all:"{partial_title}"'
+    else:
+        looser_query = title
+    candidate, ratio = search_variant(looser_query, title)
+    if candidate is not None:
+        return candidate
+
+    # If looser query fails, fallback to stricter queries concurrently.
     query_variants = [
         f'ti:"{title}"',
         f'all:"{title}"',
         f'ti:{title}',
-        title  # raw title search.
+        title
     ]
     best_candidate = None
     best_ratio = 0.0
-    threshold = 0.75
     with concurrent.futures.ThreadPoolExecutor(max_workers=len(query_variants)) as executor:
         futures = {executor.submit(search_variant, query, title): query for query in query_variants}
         for future in concurrent.futures.as_completed(futures):
-            candidate, ratio = future.result()
-            if ratio > best_ratio:
-                best_ratio = ratio
-                best_candidate = candidate
-    if best_candidate is not None and best_ratio >= threshold:
-        return best_candidate
-    return None
+            cand, rat = future.result()
+            if cand is not None and rat > best_ratio:
+                best_ratio = rat
+                best_candidate = cand
+    return best_candidate
 
 @app.route('/get_arxiv_details')
 def get_arxiv_details():
@@ -187,7 +188,6 @@ def ask_paper():
             max_tokens=200
         )
         final_response = completion.choices[0].message.content
-        print("Chat response from OpenAI:", final_response)
         citations = re.findall(r'\[Source:\s*(.*?)\]', final_response)
     except Exception as e:
         final_response = f"Error retrieving response from OpenAI: {str(e)}"
@@ -203,16 +203,18 @@ def get_recommendations():
     """
     Receives saved papers and followed authors (only the most recent two of each),
     then queries the Semantic Scholar API for similar items.
-    Filters duplicates and returns unique recommendations.
+    Filters out items that the user has already read or followed.
     """
     data = request.get_json()
-    saved = data.get("savedPapers", [])[-2:]
-    authors = data.get("followedAuthors", [])[-2:]
+    saved = data.get("savedPapers", [])
+    authors_followed = data.get("followedAuthors", [])
     rec_papers = {}
     rec_authors = {}
+
+    # For each saved paper, query Semantic Scholar for recommendations
     for paper in saved:
         query = paper
-        url = f"https://api.semanticscholar.org/graph/v1/paper/search?query={query}&limit=2&fields=title,url"
+        url = f"https://api.semanticscholar.org/graph/v1/paper/search?query={query}&limit=5&fields=title,url,year"
         try:
             response = requests.get(url, timeout=5)
             if response.status_code == 200:
@@ -220,13 +222,22 @@ def get_recommendations():
                 for item in results:
                     title_rec = item.get("title")
                     url_rec = item.get("url")
-                    if title_rec and url_rec:
-                        rec_papers[title_rec] = url_rec
+                    year = item.get("year")
+                    # Filter out if this paper is already read.
+                    if title_rec and url_rec and title_rec not in saved:
+                        # If we already have an entry, keep the one with the newer year.
+                        if title_rec in rec_papers:
+                            if rec_papers[title_rec].get("year", 0) < (year or 0):
+                                rec_papers[title_rec] = {"url": url_rec, "year": year}
+                        else:
+                            rec_papers[title_rec] = {"url": url_rec, "year": year}
         except Exception as e:
             print("Error in recommendation for paper:", paper, e)
-    for author in authors:
+
+    # For each followed author, query Semantic Scholar for similar authors.
+    for author in authors_followed:
         query = author
-        url = f"https://api.semanticscholar.org/graph/v1/author/search?query={query}&limit=2&fields=name,url"
+        url = f"https://api.semanticscholar.org/graph/v1/author/search?query={query}&limit=5&fields=name,url"
         try:
             response = requests.get(url, timeout=5)
             if response.status_code == 200:
@@ -234,12 +245,16 @@ def get_recommendations():
                 for item in results:
                     name_rec = item.get("name")
                     url_rec = item.get("url")
-                    if name_rec and url_rec:
+                    # Filter out if already followed.
+                    if name_rec and url_rec and name_rec not in authors_followed:
                         rec_authors[name_rec] = url_rec
         except Exception as e:
             print("Error in recommendation for author:", author, e)
+
+    # Sort the recommended papers by year (newest first)
+    sorted_papers = sorted(rec_papers.items(), key=lambda x: x[1].get("year", 0), reverse=True)
     recommendations = {
-        "papers": [{"title": k, "url": v} for k, v in rec_papers.items()],
+        "papers": [{"title": k, "url": v["url"]} for k, v in sorted_papers],
         "authors": [{"name": k, "url": v} for k, v in rec_authors.items()]
     }
     return jsonify(recommendations)
